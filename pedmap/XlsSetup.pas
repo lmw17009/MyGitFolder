@@ -47,6 +47,7 @@ type
     btnUnlock: TButton;
     procedure FormCreate(Sender: TObject);
     procedure lst1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure btnUpdateClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -63,7 +64,14 @@ var
 
 implementation
 
+uses
+  JsonAdjust;
 {$R *.dfm}
+
+procedure TForm13.btnUpdateClick(Sender: TObject);
+begin
+   LoadTstParam;
+end;
 
 procedure TForm13.FormCreate(Sender: TObject);
 begin
@@ -91,6 +99,7 @@ begin
     JunoParam.MinTables := 3;
     JunoParam.TableDiff := 'Counter$';
     JunoParam.DiffBool := True;
+    mmo1.Lines.Add(JsonXlsParam2Str(JunoParam));
 
     FTIParam.PPIDPos := 'C4:C5';
     FTIParam.LotPos := '';

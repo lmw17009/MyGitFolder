@@ -152,6 +152,7 @@ object Form13: TForm13
     Height = 25
     Caption = #26356#26032
     TabOrder = 10
+    OnClick = btnUpdateClick
   end
   object btnUnlock: TButton
     Left = 182

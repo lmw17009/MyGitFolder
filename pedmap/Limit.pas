@@ -9,7 +9,7 @@ uses
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait,
   FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Phys.ODBCDef,
   FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC, Data.DB, FireDAC.Comp.DataSet,
-  FireDAC.Comp.Client, Vcl.Menus, Winapi.ShellAPI;
+  FireDAC.Comp.Client, Vcl.Menus, Winapi.ShellAPI, XlsSetup;
 
 type
   TForm10 = class(TForm)
@@ -29,6 +29,7 @@ type
     procedure N1Click(Sender: TObject);
   private
     procedure XlsFileRead(FileList: TStrings);
+    function XlsReadConfigIni(XlsPa: XlsParam): string;
     { Private declarations }
   public
     { Public declarations }
@@ -40,8 +41,7 @@ var
 
 implementation
 
-uses
-  XlsSetup;
+
 {$R *.dfm}
 
 procedure TForm10.btn1Click(Sender: TObject);
@@ -214,6 +214,11 @@ begin
   Tables.Clear;
   MyCon.Free;
   MyQry.Free;
+end;
+
+function TForm10.XlsReadConfigIni(XlsPa: XlsParam): string;
+begin
+
 end;
 
 procedure TForm10.FormCreate(Sender: TObject);
