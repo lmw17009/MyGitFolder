@@ -25,14 +25,26 @@ type
 
 type
   TForm13 = class(TForm)
-    lbl1: TLabel;
-    lbl2: TLabel;
-    lbl3: TLabel;
-    chkJuno: TCheckBox;
-    chkFocus: TCheckBox;
-    chkAcco: TCheckBox;
     lst1: TListBox;
     mmo1: TMemo;
+    lbl4: TLabel;
+    lbl5: TLabel;
+    lbl6: TLabel;
+    lbl7: TLabel;
+    lbl8: TLabel;
+    lbl9: TLabel;
+    lbl10: TLabel;
+    lbl11: TLabel;
+    edtPPID: TEdit;
+    edtLot: TEdit;
+    edtWaferID: TEdit;
+    edtMinTables: TEdit;
+    edtMaxTables: TEdit;
+    edtCreateTime: TEdit;
+    edtDiffTables: TEdit;
+    edtDiffBool: TEdit;
+    btnUpdate: TButton;
+    btnUnlock: TButton;
     procedure FormCreate(Sender: TObject);
     procedure lst1MouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private

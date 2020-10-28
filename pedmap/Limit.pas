@@ -76,19 +76,27 @@ var
   buffer: array[0..1024] of Char;
   FileCount: Integer;
   I: Integer;
+  DragFileList: TStrings;
 begin
   inherited;
   FileCount := DragQueryFile(Msg.WParam, $FFFFFFFF, nil, 0);
+  if FileCount > 0 then
+  begin
+    DragFileList := TStringList.Create;
+  end;
   for I := 0 to FileCount - 1 do
   begin
     buffer[0] := #0;
     DragQueryFile(Msg.WParam, I, buffer, SizeOf(buffer)); //第一个文件
-    ShowMessage('当前文件路径为：' + buffer);
+    //ShowMessage('当前文件路径为：' + buffer);
+    DragFileList.Add(buffer);
   end;
+  XlsFileRead(DragFileList);
+  DragFileList.Clear;
 
 end;
 
-procedure TForm10.XlsFileRead(FileList: TStrings; );
+procedure TForm10.XlsFileRead(FileList: TStrings);
 var
   I: Integer;
   MyCon: TFDConnection;
