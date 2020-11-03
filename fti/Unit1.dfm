@@ -193,5 +193,9 @@ object Form1: TForm1
       Caption = #24320#21551#25163#21160#25195#30721
       OnClick = N3Click
     end
+    object FTI1: TMenuItem
+      Caption = #20851#38381'FTI'#36827#31243
+      OnClick = FTI1Click
+    end
   end
 end

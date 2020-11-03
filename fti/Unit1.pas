@@ -24,7 +24,8 @@ const
   ConfigFilePath = 'C:\ProgramConfigFileFolder\';
   AutoBarcodeMode = 1; //0= not autohook,1=auto hook
   WorkMode = 1; //0=PPID;1=json
-  version = '2020-10-28';
+  version = '2020-11-01';
+  FTIProcessName = 'FTISTUDIOPRODUCTION';
 
 type
   TForm1 = class(TForm)
@@ -50,6 +51,7 @@ type
     N1: TMenuItem;
     N2: TMenuItem;
     N3: TMenuItem;
+    FTI1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure btn2Click(Sender: TObject);
     procedure tmr1Timer(Sender: TObject);
@@ -66,6 +68,7 @@ type
     procedure N1Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
     procedure N3Click(Sender: TObject);
+    procedure FTI1Click(Sender: TObject);
   private
     procedure EdtClearPro;
     procedure BarcodeManualInput;
@@ -83,7 +86,6 @@ type
     function FTIPathInI: Boolean;
     function SaveFTIPath2TXT(SavePos: Integer; FileName, SavePath: string): Boolean;
     procedure DelayRun(MS: LongInt);
-    procedure KillProcess(FileName: string);
     function FindProcess(ProcessName: string): Boolean;
   end;
 
@@ -241,7 +243,7 @@ begin
     begin
       CloseProgram;
     end;
-    FindProcess('FTISTUDIOPRODUCTION'); //关闭FTI进程
+    FindProcess(FTIProcessName); //关闭FTI进程
     if not CreateProcess(nil, PWideChar(ParamaLineStr), nil, nil, True, CREATE_NEW_CONSOLE or NORMAL_PRIORITY_CLASS, nil, nil, StInfo, PInfo) then
     begin
       MmoAdd('BarcodeCheck:程序启动失败。');
@@ -509,7 +511,7 @@ begin
   begin
     ProcesStr := UpperCase(ExtractFileName(lppe.szExeFile));
     ProcesStr1 := UpperCase(lppe.szExeFile);
-    //MmoAdd(ProcesStr+'/'+ProcesStr1);
+    //MmoAdd(ProcesStr + '/' + ProcesStr1);
     //if ((UpperCase(ExtractFileName(lppe.szExeFile)) = UpperCase(ProcessName)) or (UpperCase(lppe.szExeFile) = UpperCase(ProcessName))) then
     if (Pos(ProcessName, ProcesStr) > 0) or (Pos(ProcessName, ProcesStr1) > 0) then
     begin
@@ -574,6 +576,14 @@ begin
   if FBarReader <> nil then
   begin
     FBarReader.HideNoMonitor := False;
+  end;
+end;
+
+procedure TForm1.FTI1Click(Sender: TObject);
+begin
+  if not FindProcess(FTIProcessName) then
+  begin
+    ShowMessage('未发现FTI进程。');
   end;
 end;
 
@@ -672,11 +682,6 @@ begin
   begin
     MmoAdd('Barcode监控开始...');
   end;
-end;
-
-procedure TForm1.KillProcess(FileName: string);
-begin
-//
 end;
 
 procedure TForm1.mmo1Change(Sender: TObject);
