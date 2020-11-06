@@ -1,12 +1,12 @@
 unit Unit1;
-
+
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus,
   Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ButtonGroup, Vcl.Buttons, Vcl.Imaging.pngimage,
-  System.Math;
+  System.Math, Vcl.ComCtrls;
 
 type
   TForm1 = class(TForm)
@@ -137,7 +137,7 @@ implementation
 
 uses
   Global, Unit2, Unit3, Unit5, Unit6, Unit7, Unit8, WAT, Limit, FTP, WatLimit,
-  XlsReName, Help;
+  XlsReName, Help, Update, XlsFileAdjust;
 
 procedure TForm1.A1Click(Sender: TObject);
 begin
@@ -1642,6 +1642,11 @@ end;
 procedure TForm1.mniTSKSampleClick(Sender: TObject);
 begin
   mniTSKSample.Checked := not mniTSKSample.Checked;
+  if mniTSKSample.Checked then
+  begin
+    ShowMessage('TSK机台支持Sample功能需进行机台设置。');
+    ShowMessage(HelpSample);
+  end;
 end;
 
 procedure TForm1.XLBtnClick(Sender: TObject);
@@ -1749,7 +1754,8 @@ end;
 procedure TForm1.CPSPEC1Click(Sender: TObject);
 begin
   ShowMessage('请在程序路径Limit文件夹放入相同批次数据。');
-  Form10.Show;
+  //Form10.Show;
+  xlsfileRename.Show;
 end;
 
 procedure TForm1.Dat1Click(Sender: TObject);
@@ -1952,3 +1958,4 @@ end;
 
 end.
 
+

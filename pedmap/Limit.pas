@@ -1,5 +1,5 @@
 unit Limit;
-
+
 interface
 
 uses
@@ -10,7 +10,7 @@ uses
   FireDAC.Stan.Async, FireDAC.Phys, FireDAC.VCLUI.Wait, FireDAC.Stan.Param,
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Phys.ODBCDef,
   FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC, Data.DB, FireDAC.Comp.DataSet,
-  FireDAC.Comp.Client, Vcl.Menus, Winapi.ShellAPI, XlsSetup;
+  FireDAC.Comp.Client, Vcl.Menus, Winapi.ShellAPI, XlsSetup, Vcl.ComCtrls;
 
 type
   TForm10 = class(TForm)
@@ -25,6 +25,7 @@ type
     mm1: TMainMenu;
     N1: TMenuItem;
     mmo3: TMemo;
+    lv1: TListView;
     procedure FormCreate(Sender: TObject);
     procedure btn1Click(Sender: TObject);
     procedure N1Click(Sender: TObject);
@@ -50,6 +51,7 @@ var
   Dlg: TOpenDialog;
   FileList: TStrings;
 begin
+
   if edtPPIDName.Text <> '' then
   begin
     Dlg := TOpenDialog.Create(Self);
@@ -57,16 +59,16 @@ begin
     Dlg.Filter := '需要更改的文件(*.xls;*xlsx)|*.xls;*xlsx';
     Dlg.Options := [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing];
     Dlg.InitialDir := ExtractFilePath(ParamStr(0)) + 'Limit';
-
     try
       if Dlg.Execute then
       begin
         FileList := Dlg.Files;
         XlsFileRead(FileList);
+
+
       end;
     finally
       FreeAndNil(Dlg);
-      ;
     end;
   end;
 
@@ -93,7 +95,7 @@ begin
     DragFileList.Add(buffer);
   end;
   XlsFileRead(DragFileList);
-  DragFileList.Clear;
+  //DragFileList.Clear;
 
 end;
 
@@ -113,103 +115,123 @@ var
   ErrMsg: string;
   TypeList: TStrings;
 begin
+
   MyQry := TFDQuery.Create(Self);
   Tables := TStringList.Create;
   TypeList := TStringList.Create;
   ErrMsg := '准备循环文件检测！';
-  for I := 0 to FileList.Count - 1 do
+  for I := 0 to FileList.count - 1 do
   begin
-    ErrMsg := IntToStr(I) + '=>' + '检测开始:';
-    MyCon := TFDConnection.Create(Self);
-    MyCon.Params.DriverID := 'ODBC';
-    MyCon.Params.Values['DataSource'] := 'Excel Files';
-    MyCon.LoginPrompt := False;
-    NotAcco := False;
-    FileName := ExtractFileName(FileList[I]);
-    mmo1.Lines.Add(FileName);
-    MyCon.Params.Add('DataBase=' + FileList[I]);
-    MyQry.Connection := MyCon;
-    ErrMsg := IntToStr(I) + '=>' + '准备连接参数...';
-    MyCon.Connected := True;
-    mmo1.Lines.AddStrings(Tables);
-    MyCon.GetTableNames('', '', '', Tables, [osMy, osSystem, osOther], [tkTable], False);
-    ErrMsg := IntToStr(I) + '=>' + '获取tables列表！';
-    for J := 0 to Tables.Count - 1 do
-    begin
-      StrTemp := Tables[J];
-      for K := 1 to Length(StrTemp) do
-      begin
-        if (StrTemp[K] in ['0'..'9']) or (StrTemp[K] in ['a'..'z']) or (StrTemp[K] in ['A'..'Z']) or (StrTemp[K] in ['_', '-', '.', '#', ' ', '$']) then
-        begin
-          StrTempNew := StrTempNew + StrTemp[K];
-        end;
-      end;
-      ErrMsg := IntToStr(I) + '=>' + 'tables无用字符串清理...';
-      Tables[J] := StrTempNew;
-      if StrTempNew = 'Counter$' then
-      begin
-        NotAcco := True;
-      end;
-      StrTempNew := '';
-    end;
-    ErrMsg := IntToStr(I) + '=>' + '判断是否Acco文件...';
-    if not NotAcco then
-    begin
-      mmo2.Lines.Add('A-' + FileName.Split(['_'])[1]);
-      TypeList.Add('A');
-    end
-    else
-    begin
-      TypeList.Add('NA');
-    end;
-    //  FileList[I] := '';
-    //查询当前的limit
-    ErrMsg := IntToStr(I) + '=>' + '准备资源释放！';
-    MyCon.Close;
-    MyCon.Connected := False;
-    FreeAndNil(MyCon);
-    Tables.Clear;
-    ErrMsg := IntToStr(I) + '=>' + '资源释放完毕！';
+
   end;
-  //收集类型完毕
-  ErrMsg := IntToStr(I) + '=>' + '文件数据类型收集完毕！';
-  //检查list类型个数与文件数据数目是否正确
-  if TypeList.Count = FileList.Count then
-  begin
-    if MessageDlg('是否一键改名？', TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      ErrMsg := '文件改名进程...';
-      MyCon := TFDConnection.Create(Self);
-      MyCon.Params.DriverID := 'ODBC';
-      MyCon.Params.Add('Provider=Microsoft.Ace.OLEDB.12.0;Extended Properties=Excel 12.0;Persist Security Info=True');
-      MyCon.Params.Values['DataSource'] := 'Excel Files';
-      MyCon.LoginPrompt := False;
-      for N := 0 to TypeList.Count - 1 do
-      begin
-        if TypeList[N] = 'A' then
-        begin
-          MyCon.Params.Add('DataBase=D:\Lidashi\dephixeproject\tskmap\tskmap\Win32\Debug\Limit\1.XLS');
-          // + FileList[N]);
-          MyQry.Connection := MyCon;
-          MyCon.Connected := True;
-          with MyQry do
-          begin
-            Close;
-            SQL.Clear;
-            //SQL.Text := 'UPDATE [Summary information$] SET [C2:C2]=123';
-            SQL.Text := 'UPDATE [123$] SET [NUMBER]=1 WHERE [ID]=1';
-            ExecSQL;
-          end;
-        end
-        else
-        begin
-        end;
-      end;
-    end;
-  end
-  else
-  begin
-  end;
+
+//
+//  for I := 0 to FileList.Count - 1 do
+//  begin
+//    ErrMsg := IntToStr(I) + '=>' + '检测开始:';
+//    MyCon := TFDConnection.Create(Self);
+//    MyCon.Params.DriverID := 'ODBC';
+//    MyCon.Params.Values['DataSource'] := 'Excel Files';
+//    MyCon.LoginPrompt := False;
+//    NotAcco := False;
+//    FileName := ExtractFileName(FileList[I]);
+//      //mmo1.Lines.Add(FileName);
+//      //添加文件名到列表
+////    lv1.columns.Add;
+////    lv1.Columns.Items[1].Caption := FileName;
+//
+//    with lv1.Items.Add do
+//    begin
+//      Caption := FileName; //文件名
+//      MyCon.Params.Add('DataBase=' + FileList[I]);
+//      MyQry.Connection := MyCon;
+//      ErrMsg := IntToStr(I) + '=>' + '准备连接参数...';
+//      MyCon.Connected := True;
+//      MyCon.GetTableNames('', '', '', Tables, [osMy, osSystem, osOther], [tkTable], False);
+//      ErrMsg := IntToStr(I) + '=>' + '获取tables列表！';
+//      for J := 0 to Tables.Count - 1 do
+//      begin
+//        StrTemp := Tables[J];
+//        for K := 1 to Length(StrTemp) do
+//        begin
+//          if (StrTemp[K] in ['0'..'9']) or (StrTemp[K] in ['a'..'z']) or (StrTemp[K] in ['A'..'Z']) or (StrTemp[K] in ['_', '-', '.', '#', ' ', '$']) then
+//          begin
+//            StrTempNew := StrTempNew + StrTemp[K];
+//          end;
+//        end;
+//        ErrMsg := IntToStr(I) + '=>' + 'tables无用字符串清理...';
+//        Tables[J] := StrTempNew;
+//        if StrTempNew = 'Counter$' then
+//        begin
+//          NotAcco := True;
+//        end;
+//        StrTempNew := '';
+//      end;
+//      ErrMsg := IntToStr(I) + '=>' + '判断是否Acco文件...';
+//      if not NotAcco then
+//      begin
+//        //mmo2.Lines.Add('A-' + FileName.Split(['_'])[1]);
+//        SubItems[3] := 'NotAcco';
+//        //TypeList.Add('A');
+//      end
+//      else
+//      begin
+//        SubItems[3] := 'Acco';
+//        //TypeList.Add('NA');
+//      end;
+//    //  FileList[I] := '';
+//    //查询当前的limit
+//      ErrMsg := IntToStr(I) + '=>' + '准备资源释放！';
+//      MyCon.Close;
+//      MyCon.Connected := False;
+//      FreeAndNil(MyCon);
+//      Tables.Clear;
+//      ErrMsg := IntToStr(I) + '=>' + '资源释放完毕！';
+//    end;
+//  end;
+//  //收集类型完毕
+//  ErrMsg := IntToStr(I) + '=>' + '文件数据类型收集完毕！';
+//  Exit;
+//  //检查list类型个数与文件数据数目是否正确
+//  if TypeList.Count = FileList.Count then
+//  begin
+//    if MessageDlg('是否一键改名？', TMsgDlgType.mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+//    begin
+//      ErrMsg := '文件改名进程...';
+//      MyCon := TFDConnection.Create(Self);
+//      MyCon.Params.DriverID := 'ODBC';
+//      MyCon.Params.Add('Provider=Microsoft.Ace.OLEDB.12.0;Extended Properties=Excel 12.0;Persist Security Info=True');
+//      MyCon.Params.Values['DataSource'] := 'Excel Files';
+//      MyCon.LoginPrompt := False;
+//      for N := 0 to TypeList.Count - 1 do
+//      begin
+//        if TypeList[N] = 'A' then
+//        begin
+//          MyCon.Params.Add('DataBase=D:\Lidashi\dephixeproject\tskmap\tskmap\Win32\Debug\Limit\1.XLS');
+//          // + FileList[N]);
+//          MyQry.Connection := MyCon;
+//          MyCon.Connected := True;
+//          with MyQry do
+//          begin
+//            Close;
+//            SQL.Clear;
+//            //SQL.Text := 'UPDATE [Summary information$] SET [C2:C2]=123';
+//            SQL.Text := 'UPDATE [123$] SET [NUMBER]=1 WHERE [ID]=1';
+//            ExecSQL;
+//          end;
+//        end
+//        else
+//        begin
+//        //
+//        end;
+//      end;
+//    end;
+//  end
+//  else
+//  begin
+//
+//  ///
+//  end;
   TypeList.Clear;
   FileList.Clear;
   Tables.Clear;
@@ -243,3 +265,4 @@ end;
 
 end.
 
+

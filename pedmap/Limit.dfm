@@ -16,10 +16,10 @@ object Form10: TForm10
   PixelsPerInch = 96
   TextHeight = 13
   object mmo1: TMemo
-    Left = 8
-    Top = 8
-    Width = 521
-    Height = 185
+    Left = 616
+    Top = 272
+    Width = 105
+    Height = 33
     Lines.Strings = (
       'mmo1')
     ScrollBars = ssVertical
@@ -35,8 +35,8 @@ object Form10: TForm10
     OnClick = btn1Click
   end
   object mmo2: TMemo
-    Left = 528
-    Top = 8
+    Left = 304
+    Top = 216
     Width = 265
     Height = 185
     Lines.Strings = (
@@ -60,6 +60,40 @@ object Form10: TForm10
       'mmo3')
     TabOrder = 4
   end
+  object lv1: TListView
+    Left = 8
+    Top = 0
+    Width = 786
+    Height = 185
+    Columns = <
+      item
+        Caption = 'FileName'
+        Width = 200
+      end
+      item
+        Alignment = taCenter
+        Caption = 'PPID'
+        Width = 100
+      end
+      item
+        Alignment = taCenter
+        Caption = 'LotID'
+        Width = 100
+      end
+      item
+        Alignment = taCenter
+        Caption = 'ID'
+        Width = 30
+      end
+      item
+        Alignment = taCenter
+        Caption = 'Tester'
+        Width = 100
+      end>
+    GridLines = True
+    TabOrder = 5
+    ViewStyle = vsReport
+  end
   object dlgOpen1: TOpenDialog
     Left = 152
     Top = 40
@@ -82,8 +116,8 @@ object Form10: TForm10
     Top = 136
   end
   object mm1: TMainMenu
-    Left = 296
-    Top = 224
+    Left = 128
+    Top = 240
     object N1: TMenuItem
       Caption = #35774#32622
       OnClick = N1Click

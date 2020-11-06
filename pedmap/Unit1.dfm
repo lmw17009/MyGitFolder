@@ -6,7 +6,7 @@ object Form1: TForm1
   Caption = 'PED TSK&TEL Map Edit'
   ClientHeight = 645
   ClientWidth = 900
-  Color = clBtnFace
+  Color = clWindow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -268,7 +268,7 @@ object Form1: TForm1
       end
     end
     object N2: TMenuItem
-      Caption = #25805#20316
+      Caption = 'CP'
       object N4: TMenuItem
         Caption = #22352#26631#26816#27979
         OnClick = N4Click
@@ -291,10 +291,6 @@ object Form1: TForm1
         Caption = 'Dat'#25991#20214#32534#36753
         OnClick = Dat1Click
       end
-      object WATWafer1: TMenuItem
-        Caption = 'WATWafer'#25991#20214#29983#25104
-        OnClick = WATWafer1Click
-      end
       object CPSPEC1: TMenuItem
         Caption = 'CP-SPEC'#25209#37327#25991#20214#26356#25913
         OnClick = CPSPEC1Click
@@ -314,6 +310,10 @@ object Form1: TForm1
       object WatLimit1: TMenuItem
         Caption = 'WatLimit'#21019#24314
         OnClick = WatLimit1Click
+      end
+      object WATWafer1: TMenuItem
+        Caption = 'WATWafer'#25991#20214#29983#25104
+        OnClick = WATWafer1Click
       end
     end
     object N6: TMenuItem
