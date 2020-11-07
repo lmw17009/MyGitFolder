@@ -3,15 +3,14 @@ unit XlsFileAdjust;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ComCtrls, Winapi.ShellAPI, FireDAC.Stan.Intf, FireDAC.Stan.Option,
-  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
-  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param,
-  FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.VCLUI.Wait,
-  FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
-  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
-  Vcl.StdCtrls;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Winapi.ShellAPI,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.ERROR, FireDAC.UI.Intf,
+  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
+  FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.VCLUI.Wait, FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
+  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.StdCtrls,
+  Vcl.Menus, RegularExpressions, System.StrUtils;
 
 const
   XlsDiffTableName = 'Counter$';
@@ -63,14 +62,30 @@ type
     fdphysdbcdrvrlnk1: TFDPhysODBCDriverLink;
     cbb1: TComboBox;
     cbb2: TComboBox;
-    edt1: TEdit;
-    edt2: TEdit;
-    lbl1: TLabel;
+    edtAccoPPID: TEdit;
+    edtACCOLotID: TEdit;
     lbl2: TLabel;
+    cbb3: TComboBox;
+    cbb4: TComboBox;
+    edtNoACCOPPID: TEdit;
+    edtNoACCOlotID: TEdit;
+    grp1: TGroupBox;
+    grp2: TGroupBox;
+    btnYes: TButton;
+    mm1: TMainMenu;
+    N1: TMenuItem;
+    dlgOpen1: TOpenDialog;
+    edtAdjPPID: TEdit;
+    edtAdjLotID: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure cbb1Select(Sender: TObject);
     procedure cbb2Select(Sender: TObject);
+    procedure cbb3Select(Sender: TObject);
+    procedure cbb4Select(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure edtAccoPPIDChange(Sender: TObject);
+    procedure edtACCOLotIDChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -93,12 +108,22 @@ implementation
 
 procedure TXlsFileRename.cbb1Select(Sender: TObject);
 begin
-  edt1.Text := cbb1.Items[cbb1.ItemIndex];
+  edtAccoPPID.Text := cbb1.Items[cbb1.ItemIndex];
 end;
 
 procedure TXlsFileRename.cbb2Select(Sender: TObject);
 begin
-  edt2.Text := cbb2.Items[cbb2.ItemIndex];
+  edtACCOLotID.Text := cbb2.Items[cbb2.ItemIndex];
+end;
+
+procedure TXlsFileRename.cbb3Select(Sender: TObject);
+begin
+  edtNoACCOPPID.Text := cbb3.Items[cbb3.ItemIndex];
+end;
+
+procedure TXlsFileRename.cbb4Select(Sender: TObject);
+begin
+  edtNoACCOlotID.Text := cbb4.Items[cbb4.ItemIndex];
 end;
 
 procedure TXlsFileRename.DropFiles(var MSG: TMessage);
@@ -125,6 +150,33 @@ begin
   XlsFileRead(DragFileList);
 end;
 
+procedure TXlsFileRename.edtACCOLotIDChange(Sender: TObject);
+var
+  Arr: TArray<string>;
+begin
+  try
+    Arr := Trim(edtACCOLotID.Text).Split([':']);
+    edtAdjLotID.Text := Arr[1];
+  except
+
+  end;
+
+end;
+
+procedure TXlsFileRename.edtAccoPPIDChange(Sender: TObject);
+var
+  Arr, Arr2: TArray<string>;
+begin
+  try
+    //Arr := TRegEx.Split(Trim(edtAccoPPID.Text), ' \ ');
+    //edtAdjPPID.Text := Arr[1];
+    Arr := Trim(edtAccoPPID.Text).Split(['\ACCO\']);
+    edtAdjPPID.Text := Arr[1].Split(['.'])[0];
+  except
+
+  end;
+end;
+
 procedure TXlsFileRename.FormCreate(Sender: TObject);
 begin
   ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
@@ -137,6 +189,26 @@ end;
 procedure TXlsFileRename.FormDestroy(Sender: TObject);
 begin
   PedXlsList.Destroy;
+end;
+
+procedure TXlsFileRename.N1Click(Sender: TObject);
+var
+  Dlg: TOpenDialog;
+  List: TStrings;
+begin
+  try
+    Dlg := TOpenDialog.Create(Self);
+    Dlg.Filter := '*.xls|*.xls;*.xlsx|*.xlsx';
+    Dlg.Options := [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing];
+    if Dlg.Execute then
+    begin
+      List := Dlg.Files;
+      XlsFileRead(List);
+    end;
+  finally
+    Dlg.Free;
+  end;
+
 end;
 
 procedure TXlsFileRename.TablesAdj(out Table: TStrings; out IsAcco: Boolean);
@@ -190,15 +262,6 @@ begin
         Conn1.LoginPrompt := False;
         Conn1.Params.Add('DataBase=' + FileList[I]);
         Conn1.Connected := True;
-        Qry1.Connection := Conn1;
-        with Qry1 do
-        begin
-          Close;
-          SQL.Text := 'update [test$A5:A6] set id=1111';
-          ExecSQL;
-          Close;
-        end;
-        Exit;
         Conn1.GetTableNames('', '', '', XlsTables, [osMy, osSystem, osOther], [tkTable], False);
         TablesAdj(XlsTables, XlsItem.IsAccoType);
         XlsItem.Tables := XlsTables;
@@ -248,11 +311,6 @@ begin
                   SubItems.Add(XlsItem.LotID);
                   SubItems.Add(XlsItem.ID);
                   SubItems.Add('NotAcco');
-                  Close;
-                  SQL.Clear;
-                  SQL.Text := 'update [' + QryTableName + '] set G3:G4=1';
-                  ExecSQL;
-
                 end;
                 Break;
               end;
@@ -313,8 +371,17 @@ begin
   end;
   for I := 0 to PedXlsList.Count - 1 do
   begin
-    cbb1.Items.Add(PedXlsList[I].PPID);
-    cbb2.Items.Add(PedXlsList[I].LotID);
+    if PedXlsList[I].IsAccoType then
+    begin
+      cbb1.Items.Add(PedXlsList[I].PPID);
+      cbb2.Items.Add(PedXlsList[I].LotID);
+    end
+    else
+    begin
+      cbb3.Items.Add(PedXlsList[I].PPID);
+      cbb4.items.Add(PedXlsList[I].LotID);
+    end;
+
   end;
 
   XlsTables.Clear;
