@@ -56,6 +56,7 @@ object XlsFileRename: TXlsFileRename
         Width = 80
       end>
     GridLines = True
+    MultiSelect = True
     TabOrder = 0
     ViewStyle = vsReport
   end
@@ -192,6 +193,7 @@ object XlsFileRename: TXlsFileRename
     Height = 41
     Caption = #19968#38190#26356#25913
     TabOrder = 3
+    OnClick = btnYesClick
   end
   object Conn1: TFDConnection
     Params.Strings = (

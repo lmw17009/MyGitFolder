@@ -86,6 +86,7 @@ type
     procedure N1Click(Sender: TObject);
     procedure edtAccoPPIDChange(Sender: TObject);
     procedure edtACCOLotIDChange(Sender: TObject);
+    procedure btnYesClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -105,6 +106,69 @@ implementation
 {$R *.dfm}
 
 { TXlsFileRename }
+
+procedure TXlsFileRename.btnYesClick(Sender: TObject);
+var
+  APPIDAll, APPID, ALotIDAll, ALotID, NAPPID, NALotID: string;
+  I: Integer;
+begin
+  if PedXlsList.Count = 0 then
+    Abort;
+  APPIDAll := edtAccoPPID.Text;
+  APPID := edtAdjPPID.Text;
+  ALotIDAll := edtACCOLotID.Text;
+  ALotID := edtAdjLotID.Text;
+  NAPPID := edtNoACCOPPID.Text;
+  NALotID := edtNoACCOlotID.Text;
+  for I := 0 to lv1.Items.Count - 1 do
+  begin
+    if lv1.Items[I].Checked then
+    begin
+      if PedXlsList[I].IsAccoType then
+      begin
+        //acco file edit
+        //check ppid is or not new?
+        Conn1 := TFDConnection.Create(Self);
+        Conn1.Params.DriverID := 'ODBC';
+        Conn1.Params.Values['DataSource'] := 'Excel Files';
+        Conn1.LoginPrompt := False;
+        Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
+        Conn1.Connected := True;
+        Qry1 := TFDQuery.Create(Self);
+        Qry1.Connection := Conn1;
+        if PedXlsList[I].PPID <> APPIDAll then
+        begin
+          //change ppid
+          with Qry1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsDiffTablesNameAcco + '].f1="' + APPIDAll + '" where [' + XlsDiffTablesNameAcco + '].f1="' + PedXlsList[I].PPID+'"';
+            ExecSQL;
+          end;
+        end;
+        //change lotid
+        if PedXlsList[I].LotID <> ALotIDAll then
+        begin
+          //change ppid
+          with Qry1 do
+          begin
+            Close;
+            SQL.Clear;
+            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsDiffTablesNameAcco + '].f1="' + ALotIDAll + '" where [' + XlsDiffTablesNameAcco + '].f1="' + PedXlsList[I].LotID+'"';
+            ExecSQL;
+          end;
+        end;
+        
+      end
+      else
+      begin
+
+      end;
+    end;
+  end;
+
+end;
 
 procedure TXlsFileRename.cbb1Select(Sender: TObject);
 begin
