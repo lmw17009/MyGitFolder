@@ -197,7 +197,7 @@ object XlsFileRename: TXlsFileRename
   end
   object Conn1: TFDConnection
     Params.Strings = (
-      'Database=d:\1.xls'
+      'Database=d:\11.xls'
       'DataSource=Excel Files'
       'DriverID=ODBC')
     LoginPrompt = False
@@ -206,6 +206,8 @@ object XlsFileRename: TXlsFileRename
   end
   object Qry1: TFDQuery
     Connection = Conn1
+    SQL.Strings = (
+      'select * from [summary information$]')
     Left = 560
     Top = 72
   end
