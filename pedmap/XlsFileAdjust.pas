@@ -142,6 +142,7 @@ begin
         Conn1.Connected := True;
         Qry1 := TFDQuery.Create(Self);
         Qry1.Connection := Conn1;
+        //acco文件只需要修改summary information$即可
         if PedXlsList[I].PPID <> APPIDAll then
         begin
           //change ppid
@@ -166,11 +167,10 @@ begin
             ExecSQL;
           end;
         end;
-
       end
       else
       begin
-              //not acco file edit
+        //not acco file edit
         //check ppid is or not new?
         Conn1 := TFDConnection.Create(Self);
         Conn1.Params.DriverID := 'ODBC';
@@ -180,13 +180,42 @@ begin
         Conn1.Connected := True;
         Qry1 := TFDQuery.Create(Self);
         Qry1.Connection := Conn1;
+
+//        //XlsDiffTableName
+//        if PedXlsList[I].PPID <> NAPPID then
+//        begin
+//          //change ppid
+//          with Qry1 do
+//          begin
+//            Close;
+//            SQL.Clear;
+//            StrSql := 'update [' + XlsDiffTableName + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+//            SQL.Text := StrSql;
+//            ExecSQL;
+//          end;
+//        end;
+//        //change lotid
+//        if PedXlsList[I].LotID <> NALotID then
+//        begin
+//          //change ppid
+//          with Qry1 do
+//          begin
+//            Close;
+//            SQL.Clear;
+//            SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+//            ExecSQL;
+//          end;
+//        end;
+
         case PedXlsList[I].TablesCount of
           2:
             begin
             //edit data sheet & counter sheet
+
+
               for J := 0 to 1 do
               begin
-                if PedXlsList[I].Tables[J] <> 'Counter' then
+                if PedXlsList[I].Tables[J] <> 'Counter$' then
                 begin
                   NormalTable := PedXlsList[I].Tables[J];
                 end;
@@ -217,6 +246,43 @@ begin
               end;
 
             end;
+          3:
+            begin
+            //非acco格式文件如果是3个表则需要修改二个数据表的内容
+              for J := 0 to 2 do
+              begin
+                if PedXlsList[I].Tables[J] <> 'Counter$' then
+                begin
+                  NormalTable := PedXlsList[I].Tables[J];
+                  if PedXlsList[I].PPID <> NAPPID then
+                  begin
+          //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      StrSql := 'update [' + NormalTable + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+                      SQL.Text := StrSql;
+                      ExecSQL;
+                    end;
+                  end;
+        //change lotid
+                  if PedXlsList[I].LotID <> NALotID then
+                  begin
+          //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+                      ExecSQL;
+                    end;
+                  end;
+
+                end;
+              end;
+
+            end;
 
         end;
         if PedXlsList[I].TablesCount = 2 then
@@ -226,6 +292,10 @@ begin
 
       end;
     end;
+    Conn1.Close;
+    Conn1.Free;
+    Qry1.Close;
+    Qry1.Free;
   end;
 
 end;
