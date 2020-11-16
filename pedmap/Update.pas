@@ -1,5 +1,5 @@
 unit Update;
-
+//2019-9 for ped
 //1,修复listview空白点击会报错的故障。Assigned(list.selected)=true
 //2,修复打开索引目录错误。SelectDirectory('选择文件提取路径', '', Str)
 //3,修复打开保存路径的错误。ShellExecute(Handle, 'open', 'Explorer.exe', PChar(GetCurrentDir), nil, SW_NORMAL);

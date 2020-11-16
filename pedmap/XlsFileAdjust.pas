@@ -3,18 +3,22 @@ unit XlsFileAdjust;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Winapi.ShellAPI,
-  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.ERROR, FireDAC.UI.Intf,
-  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
-  FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
-  FireDAC.VCLUI.Wait, FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
-  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.StdCtrls,
-  Vcl.Menus, RegularExpressions, System.StrUtils;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ComCtrls, Winapi.ShellAPI, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param,
+  FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.VCLUI.Wait,
+  FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
+  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  Vcl.StdCtrls, Vcl.Menus, RegularExpressions, System.StrUtils;
 
 const
   XlsDiffTableName = 'Counter$';
   XlsDiffTablesNameAcco = 'Summary information$';
+  XlsAccoTitle = 'STS8202 StationA';
+  XlsJunoTitle = 'ShangHai JUNO Corporation Electronics Co.,LTD';
+  XlsFocusTitle = 'Focused Test Inc.';
 
 type
   TXls = record
@@ -26,6 +30,7 @@ type
     LotID: string; //LotID
     ID: string; //Wafer ID
     IsAccoType: Boolean; //xls是否是acco格式？
+    CompanyIndex: Integer; //1 acco 2 juno 3 fti focus
   end;
 
   pTXls = ^TXls;
@@ -110,7 +115,9 @@ implementation
 procedure TXlsFileRename.btnYesClick(Sender: TObject);
 var
   APPIDAll, APPID, ALotIDAll, ALotID, NAPPID, NALotID: string;
-  I: Integer;
+  I, J: Integer;
+  StrSql: string;
+  NormalTable: string;
 begin
   if PedXlsList.Count = 0 then
     Abort;
@@ -143,7 +150,8 @@ begin
           begin
             Close;
             SQL.Clear;
-            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsDiffTablesNameAcco + '].f1="' + APPIDAll + '" where [' + XlsDiffTablesNameAcco + '].f1="' + PedXlsList[I].PPID+'"';
+            StrSql := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + APPIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].PPID + '''';
+            SQL.Text := StrSql;
             ExecSQL;
           end;
         end;
@@ -155,14 +163,60 @@ begin
           begin
             Close;
             SQL.Clear;
-            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsDiffTablesNameAcco + '].f1="' + ALotIDAll + '" where [' + XlsDiffTablesNameAcco + '].f1="' + PedXlsList[I].LotID+'"';
+            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + ALotIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].LotID + '''';
             ExecSQL;
           end;
         end;
-        
+
       end
       else
       begin
+              //not acco file edit
+        //check ppid is or not new?
+        Conn1 := TFDConnection.Create(Self);
+        Conn1.Params.DriverID := 'ODBC';
+        Conn1.Params.Values['DataSource'] := 'Excel Files';
+        Conn1.LoginPrompt := False;
+        Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
+        Conn1.Connected := True;
+        Qry1 := TFDQuery.Create(Self);
+        Qry1.Connection := Conn1;
+        if PedXlsList[I].TablesCount = 2 then
+        begin
+          //edit data sheet & counter sheet
+          for J := 0 to 1 do
+          begin
+            if PedXlsList[I].Tables[J] <> 'Counter' then
+            begin
+              NormalTable := PedXlsList[I].Tables[J];
+            end;
+          end;
+          if PedXlsList[I].PPID <> NAPPID then
+          begin
+          //change ppid
+            with Qry1 do
+            begin
+              Close;
+              SQL.Clear;
+              StrSql := 'update [' + NormalTable + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+              SQL.Text := StrSql;
+              ExecSQL;
+            end;
+          end;
+        //change lotid
+          if PedXlsList[I].LotID <> NALotID then
+          begin
+          //change ppid
+            with Qry1 do
+            begin
+              Close;
+              SQL.Clear;
+              SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+              ExecSQL;
+            end;
+          end;
+
+        end;
 
       end;
     end;
@@ -371,6 +425,22 @@ begin
                   begin
                     XlsItem.ID := Fields[0].Value;
                   end;
+                //company
+                  Close;
+                  SQL.Clear;
+                  SQL.Text := 'select * from [' + QryTableName + 'A1:A1]';
+                  Open;
+                  if RecordCount > 0 then
+                  begin
+                    if Pos('Focus', Fields[0].Value) > 0 then
+                    begin
+                      XlsItem.CompanyIndex := 3;
+                    end;
+                    if Pos('JUNO', Fields[0].Value) > 0 then
+                    begin
+                      XlsItem.CompanyIndex := 2;
+                    end;
+                  end;
                   SubItems.Add(XlsItem.PPID);
                   SubItems.Add(XlsItem.LotID);
                   SubItems.Add(XlsItem.ID);
@@ -385,6 +455,7 @@ begin
             //acco xls file
             if XlsItem.IsAccoType then
             begin
+              XlsItem.CompanyIndex := 1;
               with Qry1 do
               begin
               //ppid
@@ -447,9 +518,6 @@ begin
     end;
 
   end;
-
-  XlsTables.Clear;
-
 end;
 
 { TXlsList }
@@ -481,6 +549,7 @@ begin
     FList[Index].PPID := '';
     FList[Index].LotID := '';
     FList[Index].ID := '';
+    FList[Index].CompanyIndex := 0;
   end;
 
 end;
@@ -519,6 +588,7 @@ begin
     FList[Index].PPID := '';
     FList[Index].LotID := '';
     FList[Index].ID := '';
+    FList[Index].CompanyIndex := 0;
   end;
 
 end;
@@ -549,6 +619,7 @@ begin
     FList[Index].LotID := '';
     FList[Index].ID := '';
     FList[Index].IsAccoType := False;
+    FList[Index].CompanyIndex := 0;
   end;
 end;
 
