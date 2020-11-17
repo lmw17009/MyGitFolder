@@ -475,6 +475,7 @@ procedure TForm5.FormCreate(Sender: TObject);
 begin
   mmo3.Lines.Clear;
   Scale := trckbr1.Position;
+  self.Caption:=self.Caption+SubVer_PosCheck;
 end;
 
 function TForm5.GetMaxInArray(A: array of Integer): Integer;

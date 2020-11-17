@@ -6,7 +6,11 @@ uses
   System.Classes;
 
 const
-  Version = ' V20201107'; //°æ±¾ºÅ£¬
+  Version = ' V20201117'; //°æ±¾ºÅ
+  SubVer_Limit=' V20201019';
+  SubVer_XlsBat=' V20201117';
+  SubVer_PosCheck=' V20201009';
+  SubVer_WatCheck=' V20201117';
   XYPosOffsetToLastValue = 91;
   TelIndexPos = 14;
   TELXYPosStart = 61;

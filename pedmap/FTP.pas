@@ -449,7 +449,7 @@ begin
   begin
     CreateDir(WatFilePath);
   end;
-
+  Self.Caption := Self.Caption + SubVer_WatCheck;
 end;
 
 procedure TForm11.FormDestroy(Sender: TObject);

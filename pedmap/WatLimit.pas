@@ -39,6 +39,7 @@ type
     { Public declarations }
     procedure RefreshListView;
   end;
+
 var
   WatLimitMain: TWatLimitMain;
   PosX, PosY: Integer;
@@ -49,7 +50,7 @@ implementation
 
 {$R *.dfm}
 uses
-  WatLimitEdit;
+  WatLimitEdit, Global;
 
 procedure TWatLimitMain.btn1Click(Sender: TObject);
 var
@@ -203,7 +204,7 @@ procedure TWatLimitMain.FormCreate(Sender: TObject);
 begin
   Self.Position := poDesktopCenter;
   mmo1.Lines.Clear;
-  Self.Caption := Self.Caption + Version;
+  Self.Caption := Self.Caption + SubVer_Limit;
 end;
 
 procedure TWatLimitMain.lv1ColumnRightClick(Sender: TObject; Column: TListColumn; Point: TPoint);

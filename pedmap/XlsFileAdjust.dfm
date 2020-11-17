@@ -2,9 +2,10 @@ object XlsFileRename: TXlsFileRename
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
   Caption = 'Xls'#22788#29702
-  ClientHeight = 431
-  ClientWidth = 761
+  ClientHeight = 441
+  ClientWidth = 790
   Color = clWindow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -27,7 +28,7 @@ object XlsFileRename: TXlsFileRename
   object lv1: TListView
     Left = 0
     Top = 0
-    Width = 744
+    Width = 775
     Height = 193
     Checkboxes = True
     Columns = <
@@ -57,6 +58,7 @@ object XlsFileRename: TXlsFileRename
       end>
     GridLines = True
     MultiSelect = True
+    PopupMenu = pm1
     TabOrder = 0
     ViewStyle = vsReport
   end
@@ -70,27 +72,26 @@ object XlsFileRename: TXlsFileRename
     object cbb1: TComboBox
       Left = 0
       Top = 14
-      Width = 369
+      Width = 248
       Height = 21
       TabOrder = 0
-      Text = #35831#36873#25321'ACCO-PPID'
+      Text = #35831#36873#25321'ACCOPPID'
       OnSelect = cbb1Select
     end
     object cbb2: TComboBox
       Left = 0
       Top = 41
-      Width = 369
+      Width = 248
       Height = 21
       TabOrder = 1
-      Text = #35831#36873#25321'ACCO-LotID'
+      Text = #35831#36873#25321'ACCOLotID'
       OnSelect = cbb2Select
     end
     object edtACCOLotID: TEdit
       Left = 0
       Top = 103
-      Width = 369
+      Width = 248
       Height = 29
-      Color = clHighlight
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -17
@@ -103,7 +104,7 @@ object XlsFileRename: TXlsFileRename
     object edtAccoPPID: TEdit
       Left = 0
       Top = 68
-      Width = 369
+      Width = 248
       Height = 29
       Color = clMoneyGreen
       Font.Charset = DEFAULT_CHARSET
@@ -133,36 +134,35 @@ object XlsFileRename: TXlsFileRename
     end
   end
   object grp2: TGroupBox
-    Left = 375
+    Left = 254
     Top = 199
-    Width = 369
+    Width = 259
     Height = 177
-    Caption = #38750'ACCO'
+    Caption = 'Focus'
     TabOrder = 2
     object cbb3: TComboBox
       Left = 0
       Top = 14
-      Width = 369
+      Width = 248
       Height = 21
       TabOrder = 0
-      Text = #35831#36873#25321#38750'ACCO-PPID'
+      Text = #35831#36873#25321'FocusPPID'
       OnSelect = cbb3Select
     end
     object cbb4: TComboBox
       Left = 0
       Top = 41
-      Width = 369
+      Width = 248
       Height = 21
       TabOrder = 1
-      Text = #35831#36873#25321#38750'ACCO-LotID'
+      Text = #35831#36873#25321'FocusLotID'
       OnSelect = cbb4Select
     end
-    object edtNoACCOlotID: TEdit
+    object edtFocusLotID: TEdit
       Left = 0
       Top = 103
-      Width = 369
+      Width = 248
       Height = 29
-      Color = clHighlight
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -17
@@ -171,10 +171,10 @@ object XlsFileRename: TXlsFileRename
       ParentFont = False
       TabOrder = 2
     end
-    object edtNoACCOPPID: TEdit
+    object edtFocusPPID: TEdit
       Left = 0
       Top = 68
-      Width = 369
+      Width = 248
       Height = 29
       Color = clMoneyGreen
       Font.Charset = DEFAULT_CHARSET
@@ -184,6 +184,14 @@ object XlsFileRename: TXlsFileRename
       Font.Style = []
       ParentFont = False
       TabOrder = 3
+      OnChange = edtFocusPPIDChange
+    end
+    object edtFocusAdjustPPID: TEdit
+      Left = 0
+      Top = 138
+      Width = 121
+      Height = 21
+      TabOrder = 4
     end
   end
   object btnYes: TButton
@@ -194,6 +202,59 @@ object XlsFileRename: TXlsFileRename
     Caption = #19968#38190#26356#25913
     TabOrder = 3
     OnClick = btnYesClick
+  end
+  object grp3: TGroupBox
+    Left = 519
+    Top = 199
+    Width = 256
+    Height = 177
+    Caption = 'JUNO'
+    TabOrder = 4
+    object edtJUNOLotID: TEdit
+      Left = 8
+      Top = 103
+      Width = 248
+      Height = 29
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 0
+    end
+    object edtJUNOPPID: TEdit
+      Left = 8
+      Top = 68
+      Width = 248
+      Height = 29
+      Color = clMoneyGreen
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -17
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 1
+    end
+    object cbb6: TComboBox
+      Left = 8
+      Top = 41
+      Width = 248
+      Height = 21
+      TabOrder = 2
+      Text = #35831#36873#25321'JUNOLotID'
+      OnSelect = cbb6Select
+    end
+    object cbb5: TComboBox
+      Left = 8
+      Top = 14
+      Width = 248
+      Height = 21
+      TabOrder = 3
+      Text = #35831#36873#25321'JUNOPPID'
+      OnSelect = cbb5Select
+    end
   end
   object Conn1: TFDConnection
     Params.Strings = (
@@ -232,5 +293,13 @@ object XlsFileRename: TXlsFileRename
     Options = [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing]
     Left = 160
     Top = 72
+  end
+  object pm1: TPopupMenu
+    Left = 360
+    Top = 128
+    object N2: TMenuItem
+      Caption = #20840#36873
+      OnClick = N2Click
+    end
   end
 end

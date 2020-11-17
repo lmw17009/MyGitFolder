@@ -1753,7 +1753,7 @@ end;
 
 procedure TForm1.CPSPEC1Click(Sender: TObject);
 begin
-  ShowMessage('请在程序路径Limit文件夹放入相同批次数据。');
+  ShowMessage('请拖拽或者加载入未被打开的PED CP测试数据[修改模式为按测试机类型ACCO/JUNO/FOCUS]！');
   //Form10.Show;
   xlsfileRename.Show;
 end;

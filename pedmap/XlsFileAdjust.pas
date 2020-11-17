@@ -3,14 +3,15 @@ unit XlsFileAdjust;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Winapi.ShellAPI,
-  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
-  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
-  FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
-  FireDAC.VCLUI.Wait, FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
-  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.StdCtrls,
-  Vcl.Menus, RegularExpressions, System.StrUtils;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ComCtrls, Winapi.ShellAPI, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param,
+  FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.VCLUI.Wait,
+  FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
+  FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  Vcl.StdCtrls, Vcl.Menus, RegularExpressions, System.StrUtils;
 
 const
   XlsDiffTableName = 'Counter$';
@@ -71,8 +72,8 @@ type
     lbl2: TLabel;
     cbb3: TComboBox;
     cbb4: TComboBox;
-    edtNoACCOPPID: TEdit;
-    edtNoACCOlotID: TEdit;
+    edtFocusPPID: TEdit;
+    edtFocusLotID: TEdit;
     grp1: TGroupBox;
     grp2: TGroupBox;
     btnYes: TButton;
@@ -81,6 +82,14 @@ type
     dlgOpen1: TOpenDialog;
     edtAdjPPID: TEdit;
     edtAdjLotID: TEdit;
+    grp3: TGroupBox;
+    edtJUNOLotID: TEdit;
+    edtJUNOPPID: TEdit;
+    cbb6: TComboBox;
+    cbb5: TComboBox;
+    edtFocusAdjustPPID: TEdit;
+    pm1: TPopupMenu;
+    N2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure cbb1Select(Sender: TObject);
@@ -91,213 +100,59 @@ type
     procedure edtAccoPPIDChange(Sender: TObject);
     procedure edtACCOLotIDChange(Sender: TObject);
     procedure btnYesClick(Sender: TObject);
+    procedure edtFocusPPIDChange(Sender: TObject);
+    procedure cbb5Select(Sender: TObject);
+    procedure cbb6Select(Sender: TObject);
+    procedure N2Click(Sender: TObject);
   private
+    procedure ChangeXlsData(out XlsCount: Integer);
+    procedure XlsAddList;
     { Private declarations }
   public
     { Public declarations }
     procedure DropFiles(var MSG: TMessage); message WM_DROPFILES;
     function XlsFileRead(FileList: TStrings): Boolean;
+    function XlsRead(FilePath: string): Boolean;
     //function GotXlsMsg(FilePath: string): Boolean;
     procedure TablesAdj(out Table: TStrings; out IsAcco: Boolean);
+    procedure DataIni;
+    function ReXlsName(List: TXlsList; out Count: Integer): Boolean;
+    procedure PosStr(Str: string; StrFind: string; Pos: Integer; out SplitStr_1: string);
+    function StrCount(SubStr, Str: string): Integer; overload;
+    function StrCount(SubStr, Str: string; IndexPos: Integer; Direction: Integer): Integer; overload;
   end;
 
 var
   XlsFileRename: TXlsFileRename;
   PedXlsList: TXlsList;
+  TempXlsList: TStrings; //xls文件列表
+  //XlsTables: TStrings; //tables list
 
 implementation
 
+uses
+  Global;
 {$R *.dfm}
 
 { TXlsFileRename }
 
 procedure TXlsFileRename.btnYesClick(Sender: TObject);
 var
-  APPIDAll, APPID, ALotIDAll, ALotID, NAPPID, NALotID: string;
-  I, J: Integer;
-  StrSql: string;
-  NormalTable: string;
+  Count, i, AdjCount: Integer;
 begin
-  if PedXlsList.Count = 0 then
-    Abort;
-  APPIDAll := edtAccoPPID.Text;
-  APPID := edtAdjPPID.Text;
-  ALotIDAll := edtACCOLotID.Text;
-  ALotID := edtAdjLotID.Text;
-  NAPPID := edtNoACCOPPID.Text;
-  NALotID := edtNoACCOlotID.Text;
-  for I := 0 to lv1.Items.Count - 1 do
+  //修改xls内容
+  ChangeXlsData(AdjCount);
+  //xls文件名
+  if AdjCount > 0 then
   begin
-    if lv1.Items[I].Checked then
+    ReXlsName(PedXlsList, Count);
+    DataIni;
+    for i := 0 to TempXlsList.Count - 1 do
     begin
-      if PedXlsList[I].IsAccoType then
-      begin
-        //acco file edit
-        //check ppid is or not new?
-        Conn1 := TFDConnection.Create(Self);
-        Conn1.Params.DriverID := 'ODBC';
-        Conn1.Params.Values['DataSource'] := 'Excel Files';
-        Conn1.LoginPrompt := False;
-        Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
-        Conn1.Connected := True;
-        Qry1 := TFDQuery.Create(Self);
-        Qry1.Connection := Conn1;
-        //acco文件只需要修改summary information$即可
-        if PedXlsList[I].PPID <> APPIDAll then
-        begin
-          //change ppid
-          with Qry1 do
-          begin
-            Close;
-            SQL.Clear;
-            StrSql := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + APPIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].PPID + '''';
-            SQL.Text := StrSql;
-            ExecSQL;
-          end;
-        end;
-        //change lotid
-        if PedXlsList[I].LotID <> ALotIDAll then
-        begin
-          //change ppid
-          with Qry1 do
-          begin
-            Close;
-            SQL.Clear;
-            SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + ALotIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].LotID + '''';
-            ExecSQL;
-          end;
-        end;
-      end
-      else
-      begin
-        //not acco file edit
-        //check ppid is or not new?
-        Conn1 := TFDConnection.Create(Self);
-        Conn1.Params.DriverID := 'ODBC';
-        Conn1.Params.Values['DataSource'] := 'Excel Files';
-        Conn1.LoginPrompt := False;
-        Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
-        Conn1.Connected := True;
-        Qry1 := TFDQuery.Create(Self);
-        Qry1.Connection := Conn1;
-
-//        //XlsDiffTableName
-//        if PedXlsList[I].PPID <> NAPPID then
-//        begin
-//          //change ppid
-//          with Qry1 do
-//          begin
-//            Close;
-//            SQL.Clear;
-//            StrSql := 'update [' + XlsDiffTableName + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
-//            SQL.Text := StrSql;
-//            ExecSQL;
-//          end;
-//        end;
-//        //change lotid
-//        if PedXlsList[I].LotID <> NALotID then
-//        begin
-//          //change ppid
-//          with Qry1 do
-//          begin
-//            Close;
-//            SQL.Clear;
-//            SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
-//            ExecSQL;
-//          end;
-//        end;
-
-        case PedXlsList[I].TablesCount of
-          2:
-            begin
-            //edit data sheet & counter sheet
-
-
-              for J := 0 to 1 do
-              begin
-                if PedXlsList[I].Tables[J] <> 'Counter$' then
-                begin
-                  NormalTable := PedXlsList[I].Tables[J];
-                end;
-              end;
-              if PedXlsList[I].PPID <> NAPPID then
-              begin
-          //change ppid
-                with Qry1 do
-                begin
-                  Close;
-                  SQL.Clear;
-                  StrSql := 'update [' + NormalTable + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
-                  SQL.Text := StrSql;
-                  ExecSQL;
-                end;
-              end;
-        //change lotid
-              if PedXlsList[I].LotID <> NALotID then
-              begin
-          //change ppid
-                with Qry1 do
-                begin
-                  Close;
-                  SQL.Clear;
-                  SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
-                  ExecSQL;
-                end;
-              end;
-
-            end;
-          3:
-            begin
-            //非acco格式文件如果是3个表则需要修改二个数据表的内容
-              for J := 0 to 2 do
-              begin
-                if PedXlsList[I].Tables[J] <> 'Counter$' then
-                begin
-                  NormalTable := PedXlsList[I].Tables[J];
-                  if PedXlsList[I].PPID <> NAPPID then
-                  begin
-          //change ppid
-                    with Qry1 do
-                    begin
-                      Close;
-                      SQL.Clear;
-                      StrSql := 'update [' + NormalTable + '] set F2=''' + NAPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
-                      SQL.Text := StrSql;
-                      ExecSQL;
-                    end;
-                  end;
-        //change lotid
-                  if PedXlsList[I].LotID <> NALotID then
-                  begin
-          //change ppid
-                    with Qry1 do
-                    begin
-                      Close;
-                      SQL.Clear;
-                      SQL.Text := 'update [' + NormalTable + '] set F7=''' + NALotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
-                      ExecSQL;
-                    end;
-                  end;
-
-                end;
-              end;
-
-            end;
-
-        end;
-        if PedXlsList[I].TablesCount = 2 then
-        begin
-
-        end;
-
-      end;
+      XlsRead(TempXlsList[i]);
     end;
-    Conn1.Close;
-    Conn1.Free;
-    Qry1.Close;
-    Qry1.Free;
+    XlsAddList;
   end;
-
 end;
 
 procedure TXlsFileRename.cbb1Select(Sender: TObject);
@@ -312,12 +167,314 @@ end;
 
 procedure TXlsFileRename.cbb3Select(Sender: TObject);
 begin
-  edtNoACCOPPID.Text := cbb3.Items[cbb3.ItemIndex];
+  edtFocusPPID.Text := cbb3.Items[cbb3.ItemIndex];
 end;
 
 procedure TXlsFileRename.cbb4Select(Sender: TObject);
 begin
-  edtNoACCOlotID.Text := cbb4.Items[cbb4.ItemIndex];
+  edtFocusLotID.Text := cbb4.Items[cbb4.ItemIndex];
+end;
+
+procedure TXlsFileRename.cbb5Select(Sender: TObject);
+begin
+  edtJUNOPPID.Text := cbb5.Items[cbb5.ItemIndex];
+end;
+
+procedure TXlsFileRename.cbb6Select(Sender: TObject);
+begin
+  edtJUNOLotID.Text := cbb6.Items[cbb6.ItemIndex];
+end;
+
+procedure TXlsFileRename.DataIni;
+begin
+  cbb1.Clear;
+  cbb2.Clear;
+  cbb3.Clear;
+  cbb4.Clear;
+  cbb5.Clear;
+  cbb6.Clear;
+  cbb1.Text := '请选择ACCOPPID';
+  cbb2.Text := '请选择ACCOLotID';
+  cbb3.Text := '请选择FocusPPID';
+  cbb4.Text := '请选择FocusLotID';
+  cbb5.Text := '请选择JUNOPPID';
+  cbb6.Text := '请选择JUNOLotID';
+  lv1.Clear;
+  PedXlsList.Clear;
+  edtAdjPPID.Text := '';
+  edtAdjLotID.Text := '';
+  edtAccoPPID.Text := '';
+  edtACCOLotID.Text := '';
+  edtFocusPPID.Text := '';
+  edtFocusLotID.Text := '';
+  edtJUNOPPID.Text := '';
+  edtJUNOLotID.Text := '';
+  edtFocusAdjustPPID.Text := '';
+end;
+
+procedure TXlsFileRename.ChangeXlsData(out XlsCount: Integer);
+var
+  APPIDAll: string;
+  APPID: string;
+  ALotIDAll: string;
+  ALotID: string;
+  FocusPPID: string;
+  FocusLotID: string;
+  JunoPPID: string;
+  JunoLotID: string;
+  I: Integer;
+  StrSql: string;
+  NormalTable: string;
+  J: Integer;
+begin
+  if PedXlsList.Count = 0 then
+    Abort;
+  APPIDAll := edtAccoPPID.Text;
+  APPID := edtAdjPPID.Text;
+  ALotIDAll := edtACCOLotID.Text;
+  ALotID := edtAdjLotID.Text;
+  FocusPPID := edtFocusPPID.Text;
+  FocusLotID := edtFocusLotID.Text;
+  JunoPPID := edtJUNOPPID.Text;
+  JunoLotID := edtJUNOLotID.Text;
+  XlsCount := 0;
+  for I := 0 to lv1.Items.Count - 1 do
+  begin
+    if lv1.Items[I].Checked then
+    begin
+      case PedXlsList[I].CompanyIndex of
+        1:
+          begin
+            //acco file edit
+            //check ppid is or not new?
+            Conn1 := TFDConnection.Create(Self);
+            Conn1.Params.DriverID := 'ODBC';
+            Conn1.Params.Values['DataSource'] := 'Excel Files';
+            Conn1.LoginPrompt := False;
+            Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
+            Conn1.Connected := True;
+            Qry1 := TFDQuery.Create(Self);
+            Qry1.Connection := Conn1;
+            //acco文件只需要修改summary information$即可
+            if (PedXlsList[I].PPID <> APPIDAll) and (APPIDAll <> '') then
+            begin
+              //change ppid
+              with Qry1 do
+              begin
+                Close;
+                SQL.Clear;
+                StrSql := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + APPIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].PPID + '''';
+                SQL.Text := StrSql;
+                ExecSQL;
+
+              end;
+            end;
+            //change lotid
+            if (PedXlsList[I].LotID <> ALotIDAll) and (ALotIDAll <> '') then
+            begin
+              //change ppid
+              with Qry1 do
+              begin
+                Close;
+                SQL.Clear;
+                SQL.Text := 'update [' + XlsDiffTablesNameAcco + '] set [' + XlsAccoTitle + ']=''' + ALotIDAll + ''' where [' + XlsAccoTitle + ']=''' + PedXlsList[I].LotID + '''';
+                ExecSQL;
+              end;
+            end;
+            Inc(XlsCount);
+            Conn1.Close;
+            Conn1.Free;
+            Qry1.Close;
+            Qry1.Free;
+          end;
+        2:
+          begin
+            //juno
+            Conn1 := TFDConnection.Create(Self);
+            Conn1.Params.DriverID := 'ODBC';
+            Conn1.Params.Values['DataSource'] := 'Excel Files';
+            Conn1.LoginPrompt := False;
+            Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
+            Conn1.Connected := True;
+            Qry1 := TFDQuery.Create(Self);
+            Qry1.Connection := Conn1;
+            case PedXlsList[I].TablesCount of
+              2:
+                begin
+                  //edit data sheet sheet
+                  NormalTable := '';
+                  for J := 0 to 1 do
+                  begin
+                    if PedXlsList[I].Tables[J] <> 'Counter$' then
+                    begin
+                      NormalTable := PedXlsList[I].Tables[J];
+                    end;
+                  end;
+                  if (PedXlsList[I].PPID <> JunoPPID) and (JunoPPID <> '') then
+                  begin
+                    //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      StrSql := 'update [' + NormalTable + '] set F2=''' + JunoPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+                      SQL.Text := StrSql;
+                      ExecSQL;
+                    end;
+                  end;
+                  //change lotid
+                  if (PedXlsList[I].LotID <> JunoLotID) and (JunoLotID <> '') then
+                  begin
+                    //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      SQL.Text := 'update [' + NormalTable + '] set F7=''' + JunoLotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+                      ExecSQL;
+                    end;
+                  end;
+                  Inc(XlsCount);
+                end;
+              3:
+                begin
+                  //非acco格式文件如果是3个表则需要修改二个数据表的内容
+                  for J := 0 to 2 do
+                  begin
+                    if PedXlsList[I].Tables[J] <> 'Counter$' then
+                    begin
+                      NormalTable := PedXlsList[I].Tables[J];
+                      if (PedXlsList[I].PPID <> JunoPPID) and (JunoPPID <> '') then
+                      begin
+                        //change ppid
+                        with Qry1 do
+                        begin
+                          Close;
+                          SQL.Clear;
+                          StrSql := 'update [' + NormalTable + '] set F2=''' + JunoPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+                          SQL.Text := StrSql;
+                          ExecSQL;
+                        end;
+                      end;
+                      //change lotid
+                      if (PedXlsList[I].LotID <> JunoLotID) and (JunoLotID <> '') then
+                      begin
+                        //change ppid
+                        with Qry1 do
+                        begin
+                          Close;
+                          SQL.Clear;
+                          SQL.Text := 'update [' + NormalTable + '] set F7=''' + JunoLotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+                          ExecSQL;
+                        end;
+                      end;
+                    end;
+                  end;
+                  Inc(XlsCount);
+                end;
+            end;
+            Conn1.Connected := False;
+            Conn1.Close;
+            Conn1.Free;
+            Qry1.Close;
+            Qry1.Free;
+          end;
+        3:
+          begin
+            //Focus
+            Conn1 := TFDConnection.Create(Self);
+            Conn1.Params.DriverID := 'ODBC';
+            Conn1.Params.Values['DataSource'] := 'Excel Files';
+            Conn1.LoginPrompt := False;
+            Conn1.Params.Add('DataBase=' + PedXlsList[I].FilePath);
+            Conn1.Connected := True;
+            Qry1 := TFDQuery.Create(Self);
+            Qry1.Connection := Conn1;
+            case PedXlsList[I].TablesCount of
+              2:
+                begin
+                  //edit data sheet sheet
+                  NormalTable := '';
+                  for J := 0 to 1 do
+                  begin
+                    if PedXlsList[I].Tables[J] <> 'Counter$' then
+                    begin
+                      NormalTable := PedXlsList[I].Tables[J];
+                    end;
+                  end;
+                  if (PedXlsList[I].PPID <> FocusPPID) and (FocusPPID <> '') then
+                  begin
+                    //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      StrSql := 'update [' + NormalTable + '] set F2=''' + FocusPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+                      SQL.Text := StrSql;
+                      ExecSQL;
+                    end;
+                  end;
+                  //change lotid
+                  if (PedXlsList[I].LotID <> FocusLotID) and (FocusLotID <> '') then
+                  begin
+                    //change ppid
+                    with Qry1 do
+                    begin
+                      Close;
+                      SQL.Clear;
+                      SQL.Text := 'update [' + NormalTable + '] set F7=''' + FocusLotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+                      ExecSQL;
+                    end;
+                  end;
+                  Inc(XlsCount);
+                end;
+              3:
+                begin
+                  //非acco格式文件如果是3个表则需要修改二个数据表的内容
+                  NormalTable := '';
+                  for J := 0 to 2 do
+                  begin
+                    if PedXlsList[I].Tables[J] <> 'Counter$' then
+                    begin
+                      NormalTable := PedXlsList[I].Tables[J];
+                      if (PedXlsList[I].PPID <> FocusPPID) and (FocusPPID <> '') then
+                      begin
+                        //change ppid
+                        with Qry1 do
+                        begin
+                          Close;
+                          SQL.Clear;
+                          StrSql := 'update [' + NormalTable + '] set F2=''' + FocusPPID + ''' where F2=''' + PedXlsList[I].PPID + '''';
+                          SQL.Text := StrSql;
+                          ExecSQL;
+                        end;
+                      end;
+                      //change lotid
+                      if (PedXlsList[I].LotID <> FocusLotID) and (FocusLotID <> '') then
+                      begin
+                        //change ppid
+                        with Qry1 do
+                        begin
+                          Close;
+                          SQL.Clear;
+                          SQL.Text := 'update [' + NormalTable + '] set F7=''' + FocusLotID + ''' where F7=''' + PedXlsList[I].LotID + '''';
+                          ExecSQL;
+                        end;
+                      end;
+                    end;
+                  end;
+                  Inc(XlsCount);
+                end;
+            end;
+            Conn1.Connected := False;
+            Conn1.Close;
+            Conn1.Free;
+            Qry1.Close;
+            Qry1.Free;
+          end;
+      end;
+    end;
+  end;
 end;
 
 procedure TXlsFileRename.DropFiles(var MSG: TMessage);
@@ -340,8 +497,22 @@ begin
     //ShowMessage('当前文件路径为：' + buffer);
     DragFileList.Add(buffer);
   end;
-
-  XlsFileRead(DragFileList);
+  if TempXlsList = nil then
+  begin
+    TempXlsList := TStringList.Create;
+  end
+  else
+  begin
+    TempXlsList.Clear;
+    DataIni;
+  end;
+  TempXlsList := DragFileList; //存起来做为更新成功后刷新数据检查使用
+  //XlsFileRead(DragFileList);
+  for I := 0 to DragFileList.Count - 1 do
+  begin
+    XlsRead(DragFileList[I]);
+  end;
+  XlsAddList;
 end;
 
 procedure TXlsFileRename.edtACCOLotIDChange(Sender: TObject);
@@ -349,6 +520,10 @@ var
   Arr: TArray<string>;
 begin
   try
+    if edtACCOLotID.Text = '' then
+      Abort;
+    if Pos(':', Trim(edtACCOLotID.Text)) = 0 then
+      Abort;
     Arr := Trim(edtACCOLotID.Text).Split([':']);
     edtAdjLotID.Text := Arr[1];
   except
@@ -360,19 +535,42 @@ end;
 procedure TXlsFileRename.edtAccoPPIDChange(Sender: TObject);
 var
   Arr, Arr2: TArray<string>;
+  Index: Integer;
+  Str: string;
 begin
   try
-    //Arr := TRegEx.Split(Trim(edtAccoPPID.Text), ' \ ');
-    //edtAdjPPID.Text := Arr[1];
-    Arr := Trim(edtAccoPPID.Text).Split(['\ACCO\']);
-    edtAdjPPID.Text := Arr[1].Split(['.'])[0];
+    Str := Trim(edtAccoPPID.Text);
+    if Str = '' then
+      Abort;
+    if Pos('\', Str) = 0 then
+      Abort;
+    Index := StrCount('\', Str, 1, 1);
+    edtAdjPPID.Text := Copy(Str, Index + 1, Length(Str) - Index);
   except
 
   end;
 end;
 
+procedure TXlsFileRename.edtFocusPPIDChange(Sender: TObject);
+var
+  Arr: TArray<string>;
+begin
+  try
+    if edtFocusPPID.Text = '' then
+      Abort;
+    if Pos('.', Trim(edtFocusPPID.Text)) = 0 then
+      Abort;
+    Arr := Trim(edtFocusPPID.Text).Split(['.']);
+    edtFocusAdjustPPID.Text := Arr[0];
+  except
+
+  end;
+
+end;
+
 procedure TXlsFileRename.FormCreate(Sender: TObject);
 begin
+  Self.Caption := 'Xls批量修改' + SubVer_XlsBat;
   ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYDATA, MSGFLT_ADD);
   ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
@@ -383,12 +581,14 @@ end;
 procedure TXlsFileRename.FormDestroy(Sender: TObject);
 begin
   PedXlsList.Destroy;
+  FreeAndNil(TempXlsList);
 end;
 
 procedure TXlsFileRename.N1Click(Sender: TObject);
 var
   Dlg: TOpenDialog;
   List: TStrings;
+  i: Integer;
 begin
   try
     Dlg := TOpenDialog.Create(Self);
@@ -396,13 +596,223 @@ begin
     Dlg.Options := [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing];
     if Dlg.Execute then
     begin
+      List := TStringList.Create;
       List := Dlg.Files;
-      XlsFileRead(List);
+      DataIni;
+      if List <> nil then
+      begin
+        for i := 0 to List.Count - 1 do
+        begin
+          XlsRead(List[i]);
+        end;
+        XlsAddList;
+      end;
     end;
   finally
     Dlg.Free;
   end;
 
+end;
+
+procedure TXlsFileRename.N2Click(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to lv1.Items.Count - 1 do
+  begin
+    lv1.Items[I].Checked := True;
+  end;
+
+end;
+
+procedure TXlsFileRename.PosStr(Str: string; StrFind: string; Pos: Integer; out SplitStr_1: string);
+var
+  StrTemp: string;
+  Count: Integer;
+  I: Integer;
+begin
+  if Length(StrFind) <> 1 then
+    Abort;
+  if Length(Str) < 2 then
+    Abort;
+  if Pos = 0 then
+    Abort;
+  if Pos > Length(Str) then
+    Abort;
+  Count := 0;
+  for I := 1 to Length(Str) do
+  begin
+    if Str[I] = StrFind then
+    begin
+      Inc(Count);
+      if Count = Pos then
+      begin
+        StrTemp := Copy(Str, I, Length(Str) - I + 1);
+        SplitStr_1 := StrTemp;
+        Break;
+      end;
+    end;
+
+  end;
+end;
+
+procedure TXlsFileRename.XlsAddList;
+var
+  I: Integer;
+begin
+  cbb1.Clear;
+  cbb2.Clear;
+  cbb3.Clear;
+  cbb4.Clear;
+  cbb5.Clear;
+  cbb6.Clear;
+  cbb1.Text := '请选择ACCOPPID';
+  cbb2.Text := '请选择ACCOLotID';
+  cbb3.Text := '请选择FocusPPID';
+  cbb4.Text := '请选择FocusLotID';
+  cbb5.Text := '请选择JUNOPPID';
+  cbb6.Text := '请选择JUNOLotID';
+  for I := 0 to PedXlsList.Count - 1 do
+  begin
+    case PedXlsList[I].CompanyIndex of
+      1:
+        begin
+          cbb1.Items.Add(PedXlsList[I].PPID);
+          cbb2.Items.Add(PedXlsList[I].LotID);
+        end;
+      3:
+        begin
+          cbb3.Items.Add(PedXlsList[I].PPID);
+          cbb4.items.Add(PedXlsList[I].LotID);
+        end;
+      2:
+        begin
+          cbb5.Items.Add(PedXlsList[I].PPID);
+          cbb6.items.Add(PedXlsList[I].LotID);
+        end;
+    end;
+  end;
+end;
+
+function TXlsFileRename.ReXlsName(List: TXlsList; out Count: Integer): Boolean;
+var
+  I: Integer;
+  Path, XlsDir, XlsName: string;
+  NewName: string;
+  XlsArr: TArray<string>;
+  OldNamePart: string;
+begin
+  Count := 0;
+  Result := True;
+  for I := 0 to List.Count - 1 do
+  begin
+    try
+      //Rename();
+      Path := List[I].FilePath;
+      XlsDir := ExtractFilePath(Path);
+      XlsName := ExtractFileName(Path);
+      case List[I].CompanyIndex of
+        2: //juno
+          begin
+            if edtJUNOLotID.Text <> List[I].LotID then
+            begin
+              PosStr(XlsName, '-', 1, OldNamePart);
+              NewName := edtJUNOLotID.Text + OldNamePart;
+              if RenameFile(Path, XlsDir + NewName) then
+              begin
+                Inc(Count);
+                TempXlsList[I] := XlsDir + NewName;
+              end;
+            end;
+          end;
+        3:
+          begin
+            if edtFocusLotID.Text <> List[I].LotID then
+            begin
+              PosStr(XlsName, '_', 1, OldNamePart);
+              NewName := edtFocusLotID.Text + OldNamePart;
+              if RenameFile(Path, XlsDir + NewName) then
+              begin
+                Inc(Count);
+                TempXlsList[I] := XlsDir + NewName;
+              end;
+            end;
+          end;
+        1:
+          begin
+            if (edtAccoPPID.Text <> List[I].PPID) or (edtACCOLotID.Text <> List[I].LotID) then
+            begin
+              PosStr(XlsName, '_', 3, OldNamePart);
+              NewName := edtAdjPPID.Text + '_' + edtAdjLotID.Text + OldNamePart;
+              if RenameFile(Path, XlsDir + NewName) then
+              begin
+                Inc(Count);
+                TempXlsList[I] := XlsDir + NewName;
+              end;
+            end;
+
+          end;
+
+      end;
+
+    except
+      Result := False;
+    end;
+  end;
+  ShowMessage('一共修改了' + IntToStr(Count) + '个文件！');
+
+end;
+
+function TXlsFileRename.StrCount(SubStr, Str: string; IndexPos: Integer; Direction: Integer): Integer;
+var
+  i, j, Count, RightPos: Integer;
+  List: TStrings;
+begin
+  //Direction=0 从左往右计数。=1从右往左计数
+  Result := 0;
+  Count := 0;
+  RightPos := 0;
+  List := TStringList.Create;
+  for i := 1 to Length(Str) do
+  begin
+    if Str[i] = SubStr then
+    begin
+      Inc(Count);
+      List.Add(IntToStr(i));
+    end;
+    case Direction of
+      0:
+        begin
+          if Count = IndexPos then
+          begin
+            Result := i;
+            Break;
+          end;
+        end;
+      1:
+        begin
+
+        end;
+    end;
+  end;
+  if (Direction = 1) and (IndexPos <= Count) then
+  begin
+    Result := StrToInt(List[Count - IndexPos]);
+  end;
+end;
+
+function TXlsFileRename.StrCount(SubStr, Str: string): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 1 to Length(Str) do
+  begin
+    if Str[i] = SubStr then
+    begin
+      Inc(Result);
+    end;
+  end;
 end;
 
 procedure TXlsFileRename.TablesAdj(out Table: TStrings; out IsAcco: Boolean);
@@ -434,14 +844,20 @@ end;
 
 function TXlsFileRename.XlsFileRead(FileList: TStrings): Boolean;
 var
-  I, J: Integer;
+  I, J, K: Integer;
   XlsItem: pTXls;
-  XlsTables: TStrings;
   QryTableName: string;
+  XlsTables: TStrings; //tables list
 begin
   Result := False;
-
-  XlsTables := TStringList.Create;
+  if XlsTables = nil then
+  begin
+    XlsTables := TStringList.Create;
+  end
+  else
+  begin
+    XlsTables.Clear;
+  end;
   for I := 0 to FileList.Count - 1 do
   begin
     if PedXlsList.Add(XlsItem) > 0 then
@@ -458,8 +874,11 @@ begin
         Conn1.Connected := True;
         Conn1.GetTableNames('', '', '', XlsTables, [osMy, osSystem, osOther], [tkTable], False);
         TablesAdj(XlsTables, XlsItem.IsAccoType);
-        XlsItem.Tables := XlsTables;
-        XlsItem.TablesCount := XlsTables.Count;
+        for K := 0 to XlsTables.Count - 1 do
+        begin
+          XlsItem.Tables.Add(XlsTables[K]);
+          Inc(XlsItem.TablesCount);
+        end;
         with lv1.Items.Add do
         begin
           Caption := XlsItem.FileName;
@@ -502,25 +921,29 @@ begin
                     XlsItem.ID := Fields[0].Value;
                   end;
                 //company
-                  Close;
-                  SQL.Clear;
-                  SQL.Text := 'select * from [' + QryTableName + 'A1:A1]';
-                  Open;
-                  if RecordCount > 0 then
+                  if Pos('.xml', XlsItem.PPID) > 0 then
                   begin
-                    if Pos('Focus', Fields[0].Value) > 0 then
-                    begin
-                      XlsItem.CompanyIndex := 3;
-                    end;
-                    if Pos('JUNO', Fields[0].Value) > 0 then
-                    begin
-                      XlsItem.CompanyIndex := 2;
-                    end;
+                    XlsItem.CompanyIndex := 3;
+                  end
+                  else
+                  begin
+                    XlsItem.CompanyIndex := 2;
                   end;
                   SubItems.Add(XlsItem.PPID);
                   SubItems.Add(XlsItem.LotID);
                   SubItems.Add(XlsItem.ID);
-                  SubItems.Add('NotAcco');
+                  //SubItems.Add('NotAcco');
+                  case XlsItem.CompanyIndex of
+                    2:
+                      begin
+                        SubItems.Add('JUNO');
+                      end;
+                    3:
+                      begin
+                        SubItems.Add('Focus');
+                      end;
+
+                  end;
                 end;
                 Break;
               end;
@@ -580,20 +1003,195 @@ begin
     end;
 
   end;
+  cbb1.Clear;
+  cbb2.Clear;
+  cbb3.Clear;
+  cbb4.Clear;
+  cbb5.Clear;
+  cbb6.Clear;
+  cbb1.Text := '请选择ACCOPPID';
+  cbb2.Text := '请选择ACCOLotID';
+  cbb3.Text := '请选择FocusPPID';
+  cbb4.Text := '请选择FocusLotID';
+  cbb5.Text := '请选择JUNOPPID';
+  cbb6.Text := '请选择JUNOLotID';
   for I := 0 to PedXlsList.Count - 1 do
   begin
-    if PedXlsList[I].IsAccoType then
-    begin
-      cbb1.Items.Add(PedXlsList[I].PPID);
-      cbb2.Items.Add(PedXlsList[I].LotID);
-    end
-    else
-    begin
-      cbb3.Items.Add(PedXlsList[I].PPID);
-      cbb4.items.Add(PedXlsList[I].LotID);
+    case PedXlsList[I].CompanyIndex of
+      1:
+        begin
+          cbb1.Items.Add(PedXlsList[I].PPID);
+          cbb2.Items.Add(PedXlsList[I].LotID);
+        end;
+      3:
+        begin
+          cbb3.Items.Add(PedXlsList[I].PPID);
+          cbb4.items.Add(PedXlsList[I].LotID);
+        end;
+      2:
+        begin
+          cbb5.Items.Add(PedXlsList[I].PPID);
+          cbb6.items.Add(PedXlsList[I].LotID);
+        end;
     end;
-
   end;
+end;
+
+function TXlsFileRename.XlsRead(FilePath: string): Boolean;
+var
+  I, J, K: Integer;
+  XlsItem: pTXls;
+  QryTableName: string;
+  XlsTables: TStrings; //tables list
+begin
+  Result := False;
+  XlsTables := TStringList.Create;
+
+  if PedXlsList.Add(XlsItem) > 0 then
+  begin
+    XlsItem.FilePath := FilePath;
+    XlsItem.FileName := ExtractFileName(FilePath);
+    try
+      Conn1 := TFDConnection.Create(Self);
+      Conn1.Params.DriverID := 'ODBC';
+      Conn1.Params.Values['DataSource'] := 'Excel Files';
+      Conn1.LoginPrompt := False;
+      Conn1.Params.Add('DataBase=' + FilePath);
+      Conn1.Connected := True;
+      Conn1.GetTableNames('', '', '', XlsTables, [osMy, osSystem, osOther], [tkTable], False);
+      TablesAdj(XlsTables, XlsItem.IsAccoType);
+      for K := 0 to XlsTables.Count - 1 do
+      begin
+        XlsItem.Tables.Add(XlsTables[K]);
+        Inc(XlsItem.TablesCount);
+      end;
+//      XlsItem.Tables := XlsTables;
+//      XlsItem.TablesCount := XlsTables.Count;
+      with lv1.Items.Add do
+      begin
+        Caption := XlsItem.FileName;
+        Qry1 := TFDQuery.Create(Self);
+        Qry1.Connection := Conn1;
+        if (not XlsItem.IsAccoType) and (XlsItem.TablesCount <= 3) then
+        begin
+          for J := 0 to XlsItem.TablesCount - 1 do
+          begin
+            if XlsItem.Tables[J] <> XlsDiffTableName then
+            begin
+              QryTableName := XlsItem.Tables[J];
+              with Qry1 do
+              begin
+              //ppid
+                Close;
+                SQL.Clear;
+                SQL.Text := 'select * from [' + QryTableName + 'B3:B4]';
+                Open;
+                if RecordCount > 0 then
+                begin
+                  XlsItem.PPID := Fields[0].Value;
+                end;
+                //lotid
+                Close;
+                SQL.Clear;
+                SQL.Text := 'select * from [' + QryTableName + 'G2:G3]';
+                Open;
+                if RecordCount > 0 then
+                begin
+                  XlsItem.LotID := Fields[0].Value;
+                end;
+                //WaferID
+                Close;
+                SQL.Clear;
+                SQL.Text := 'select * from [' + QryTableName + 'G3:G4]';
+                Open;
+                if RecordCount > 0 then
+                begin
+                  XlsItem.ID := Fields[0].Value;
+                end;
+                //company
+                if Pos('.xml', XlsItem.PPID) > 0 then
+                begin
+                  XlsItem.CompanyIndex := 3;
+                end
+                else
+                begin
+                  XlsItem.CompanyIndex := 2;
+                end;
+                SubItems.Add(XlsItem.PPID);
+                SubItems.Add(XlsItem.LotID);
+                SubItems.Add(XlsItem.ID);
+                  //SubItems.Add('NotAcco');
+                case XlsItem.CompanyIndex of
+                  2:
+                    begin
+                      SubItems.Add('JUNO');
+                    end;
+                  3:
+                    begin
+                      SubItems.Add('Focus');
+                    end;
+
+                end;
+              end;
+              Break;
+            end;
+          end;
+        end
+        else
+        begin
+            //acco xls file
+          if XlsItem.IsAccoType then
+          begin
+            XlsItem.CompanyIndex := 1;
+            with Qry1 do
+            begin
+              //ppid
+              Close;
+              SQL.Clear;
+              SQL.Text := 'Select * from [' + XlsDiffTablesNameAcco + 'A4:A5]';
+              Open();
+              if RecordCount > 0 then
+              begin
+                XlsItem.PPID := Fields[0].Value;
+              end;
+              //Lotid
+              Close;
+              SQL.Clear;
+              SQL.Text := 'Select * from [' + XlsDiffTablesNameAcco + 'A8:A9]';
+              Open();
+              if RecordCount > 0 then
+              begin
+                XlsItem.LotID := Fields[0].Value;
+              end;
+              //waferid
+              Close;
+              SQL.Clear;
+              SQL.Text := 'Select * from [' + XlsDiffTablesNameAcco + 'A7:A8]';
+              Open();
+              if RecordCount > 0 then
+              begin
+                XlsItem.ID := Fields[0].Value;
+              end;
+              SubItems.Add(XlsItem.PPID);
+              SubItems.Add(XlsItem.LotID);
+              SubItems.Add(XlsItem.ID);
+              SubItems.Add('Acco');
+            end;
+          end;
+        end;
+
+      end;
+
+      Conn1.Close;
+    finally
+      Conn1.Connected := False;
+      Conn1.Close;
+      Conn1.Free;
+      Qry1.Free;
+    end;
+  end;
+  XlsTables.Clear;
+
 end;
 
 { TXlsList }
@@ -627,6 +1225,7 @@ begin
     FList[Index].ID := '';
     FList[Index].CompanyIndex := 0;
   end;
+  FCount := 0;
 
 end;
 

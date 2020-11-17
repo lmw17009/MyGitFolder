@@ -292,7 +292,7 @@ object Form1: TForm1
         OnClick = Dat1Click
       end
       object CPSPEC1: TMenuItem
-        Caption = 'CP-SPEC'#25209#37327#25991#20214#26356#25913
+        Caption = 'CP-Xls'#25991#20214#25209#37327#20462#25913'[PPID/LotID]'
         OnClick = CPSPEC1Click
       end
       object XLS1: TMenuItem
