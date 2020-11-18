@@ -25,6 +25,14 @@ type
     rbEng: TRadioButton;
     lv1: TListView;
     btn1: TButton;
+    grp1: TGroupBox;
+    rb1: TRadioButton;
+    rb2: TRadioButton;
+    edtNumberCommit: TEdit;
+    btnLock: TButton;
+    btnUnlock: TButton;
+    btnUpload: TButton;
+    btnSearch: TButton;
     procedure btnSearchFileClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnConnectClick(Sender: TObject);

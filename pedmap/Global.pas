@@ -7,10 +7,11 @@ uses
 
 const
   Version = ' V20201117'; //°æ±¾ºÅ
-  SubVer_Limit=' V20201019';
-  SubVer_XlsBat=' V20201117';
-  SubVer_PosCheck=' V20201009';
-  SubVer_WatCheck=' V20201117';
+  SubVer_Limit = ' V20201019';
+  SubVer_XlsBat = ' V20201118';
+  SubVer_PosCheck = ' V20201009';
+  SubVer_WatCheck = ' V20201117';
+  SubVer_Excel = ' V20201118';
   XYPosOffsetToLastValue = 91;
   TelIndexPos = 14;
   TELXYPosStart = 61;

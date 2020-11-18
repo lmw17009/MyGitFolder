@@ -11,11 +11,14 @@ uses
   FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.VCLUI.Wait,
   FireDAC.Phys.ODBCDef, FireDAC.Phys.ODBCBase, FireDAC.Phys.ODBC,
   FireDAC.Comp.UI, Data.DB, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
-  Vcl.StdCtrls, Vcl.Menus, RegularExpressions, System.StrUtils;
+  Vcl.StdCtrls, Vcl.Menus, RegularExpressions, System.StrUtils,
+  System.Win.ComObj;
 
 const
   XlsDiffTableName = 'Counter$';
   XlsDiffTablesNameAcco = 'Summary information$';
+  AccoXls_0 = 'Summary information';
+  JunoFocusXLs_0 = 'Counter';
   XlsAccoTitle = 'STS8202 StationA';
   XlsJunoTitle = 'ShangHai JUNO Corporation Electronics Co.,LTD';
   XlsFocusTitle = 'Focused Test Inc.';
@@ -120,6 +123,8 @@ type
     procedure PosStr(Str: string; StrFind: string; Pos: Integer; out SplitStr_1: string);
     function StrCount(SubStr, Str: string): Integer; overload;
     function StrCount(SubStr, Str: string; IndexPos: Integer; Direction: Integer): Integer; overload;
+    function ApcXls2List(Path: string): TStrings;
+    function XlsDataChange(FilePathList: TXlsList): Boolean;
   end;
 
 var
@@ -136,23 +141,39 @@ uses
 
 { TXlsFileRename }
 
+function TXlsFileRename.ApcXls2List(Path: string): TStrings;
+var
+  Con1: TFDConnection;
+  Qry1: TFDQuery;
+begin
+  Con1 := TFDConnection.Create(Self);
+  Qry1 := TFDQuery.Create(Self);
+  Con1.Params.DriverID := 'ODBC';
+  Con1.Params.Values['DataSource'] := 'Excel Files';
+  Con1.LoginPrompt := False;
+  Con1.Params.Add('DataBase=' + Path);
+  Con1.Connected := True;
+  Qry1 := TFDQuery.Create(Self);
+  Qry1.Connection := Con1;
+  Con1.Free;
+  Qry1.Free;
+end;
+
 procedure TXlsFileRename.btnYesClick(Sender: TObject);
 var
   Count, i, AdjCount: Integer;
 begin
-  //修改xls内容
-  ChangeXlsData(AdjCount);
-  //xls文件名
-  if AdjCount > 0 then
+  //ChangeXlsData(AdjCount);--有问题 部分表名和第一行暂时没法修改。
+
+  XlsDataChange(PedXlsList);
+  //ReXlsName(PedXlsList, Count);
+  DataIni;
+  for i := 0 to TempXlsList.Count - 1 do
   begin
-    ReXlsName(PedXlsList, Count);
-    DataIni;
-    for i := 0 to TempXlsList.Count - 1 do
-    begin
-      XlsRead(TempXlsList[i]);
-    end;
-    XlsAddList;
+    XlsRead(TempXlsList[i]);
   end;
+  XlsAddList;
+
 end;
 
 procedure TXlsFileRename.cbb1Select(Sender: TObject);
@@ -598,12 +619,21 @@ begin
     begin
       List := TStringList.Create;
       List := Dlg.Files;
+      if TempXlsList = nil then
+      begin
+        TempXlsList := TStringList.Create;
+      end
+      else
+      begin
+        TempXlsList.Clear;
+      end;
       DataIni;
       if List <> nil then
       begin
         for i := 0 to List.Count - 1 do
         begin
           XlsRead(List[i]);
+          TempXlsList.Add(List[i]);
         end;
         XlsAddList;
       end;
@@ -618,11 +648,8 @@ procedure TXlsFileRename.N2Click(Sender: TObject);
 var
   I: Integer;
 begin
-  for I := 0 to lv1.Items.Count - 1 do
-  begin
-    lv1.Items[I].Checked := True;
-  end;
-
+  PedXlsList.Clear;
+  lv1.Clear;
 end;
 
 procedure TXlsFileRename.PosStr(Str: string; StrFind: string; Pos: Integer; out SplitStr_1: string);
@@ -692,6 +719,299 @@ begin
         end;
     end;
   end;
+  cbb1.ItemIndex := 0;
+  cbb2.ItemIndex := 0;
+  cbb3.ItemIndex := 0;
+  cbb4.ItemIndex := 0;
+  cbb5.ItemIndex := 0;
+  cbb6.ItemIndex := 0;
+
+end;
+
+function TXlsFileRename.XlsDataChange(FilePathList: TXlsList): Boolean;
+var
+  I, J, Count: Integer;
+  APPIDAll: string;
+  APPID: string;
+  ALotIDAll: string;
+  ALotID: string;
+  FocusPPID: string;
+  FocusLotID: string;
+  JunoPPID: string;
+  JunoLotID: string;
+  ExcelApp: Variant;
+  XlsName, OldNamePart, AccoStr, NewName, XlsDir: string;
+  SheetOldName, SheetNewName: string;
+begin
+  Result := False;
+  Count := 0;
+  if FilePathList.Count = 0 then
+    Abort;
+  APPIDAll := edtAccoPPID.Text;
+  APPID := edtAdjPPID.Text;
+  ALotIDAll := edtACCOLotID.Text;
+  ALotID := edtAdjLotID.Text;
+  FocusPPID := edtFocusPPID.Text;
+  FocusLotID := edtFocusLotID.Text;
+  JunoPPID := edtJUNOPPID.Text;
+  JunoLotID := edtJUNOLotID.Text;
+  ExcelApp := CreateOleObject('Excel.Application');
+  ExcelApp.Visible := True;
+  for I := 0 to FilePathList.Count - 1 do
+  begin
+
+    case FilePathList[I].CompanyIndex of
+      1:
+        begin
+        //acco
+        //默认ppid lotid必选
+          if (APPIDAll = '') or (ALotIDAll = '') then
+            Break;
+          ExcelApp.WorkBooks.Open(FilePathList[I].FilePath);
+          ExcelApp.WorkSheets[AccoXls_0].Activate;
+          if ExcelApp.Cells[5, 1].value <> APPIDAll then
+          begin
+            ExcelApp.Cells[5, 1].value := APPIDAll;
+          end;
+          if ExcelApp.Cells[9, 1].value <> ALotIDAll then
+          begin
+            ExcelApp.Cells[9, 1].value := ALotIDAll;
+          end;
+          //rename
+          XlsName := ExtractFileName(FilePathList[I].FilePath);
+          XlsDir := ExtractFilePath(FilePathList[I].FilePath);
+          PosStr(XlsName, '_', 3, OldNamePart);
+          AccoStr := edtAdjPPID.Text;
+          NewName := Copy(AccoStr, 1, Length(AccoStr) - 4) + '_' + edtAdjLotID.Text + OldNamePart;
+          //XlsDir+NewName;
+          ExcelApp.ActiveWorkBook.Saved := False;
+          ExcelApp.DisplayAlerts := False;
+          ExcelApp.ActiveWorkBook.save;
+          ExcelApp.WorkBooks.close;
+          RenameFile(FilePathList[I].FilePath, XlsDir + NewName);
+          TempXlsList[I] := XlsDir + NewName;
+          Inc(Count);
+        end;
+      2:
+      //juno
+        begin
+          if (JunoPPID = '') or (JunoLotID = '') then
+            Break;
+          ExcelApp.WorkBooks.Open(FilePathList[I].FilePath);
+          case FilePathList[I].TablesCount of
+            2:
+              begin
+                if ExcelApp.WorkSheets[1].Name <> JunoFocusXLs_0 then
+                begin
+                 //数据表修改数据
+                  ExcelApp.WorkSheets[1].Activate;
+                  if ExcelApp.Cells[4, 2].value <> JunoPPID then
+                  begin
+                    ExcelApp.Cells[4, 2].value := JunoPPID;
+                  end;
+                  if ExcelApp.Cells[3, 7].value <> JunoLotID then
+                  begin
+                    ExcelApp.Cells[3, 7].value := JunoLotID;
+                  end;
+                  SheetOldName := ExcelApp.WorkSheets[1].Name;
+                  OldNamePart := '';
+                  PosStr(SheetOldName, '-', 1, OldNamePart);
+                  SheetNewName := JunoLotID + OldNamePart;
+                  ExcelApp.WorkSheets[1].Name := SheetNewName;
+                end
+                else
+                begin
+                 //如果第一个表是counter，这种情况基本不太会有
+                  ExcelApp.WorkSheets[2].Activate;
+                  if ExcelApp.Cells[4, 1].value <> JunoPPID then
+                  begin
+                    ExcelApp.Cells[4, 1].value := JunoPPID;
+                  end;
+                  if ExcelApp.Cells[3, 7].value <> JunoLotID then
+                  begin
+                    ExcelApp.Cells[3, 7].value := JunoLotID;
+                  end;
+                  SheetOldName := ExcelApp.WorkSheets[2].Name;
+                  OldNamePart := '';
+                  PosStr(SheetOldName, '-', 1, OldNamePart);
+                  SheetNewName := JunoLotID + OldNamePart;
+                  ExcelApp.WorkSheets[2].Name := SheetNewName;
+                end;
+              //修改Counter表的信息
+                ExcelApp.WorkSheets[JunoFocusXLs_0].Activate;
+                if ExcelApp.Cells[1, 2].value <> JunoLotID then
+                begin
+                  ExcelApp.Cells[1, 2].value := JunoLotID;
+                end;
+              //save
+                XlsName := ExtractFileName(FilePathList[I].FilePath);
+                XlsDir := ExtractFilePath(FilePathList[I].FilePath);
+                PosStr(XlsName, '-', 1, OldNamePart);
+                NewName := JunoLotID + OldNamePart;
+                ExcelApp.ActiveWorkBook.Saved := False;
+                ExcelApp.DisplayAlerts := False;
+                ExcelApp.ActiveWorkBook.save;
+                ExcelApp.WorkBooks.close;
+                RenameFile(FilePathList[I].FilePath, XlsDir + NewName);
+                TempXlsList[I] := XlsDir + NewName;
+                Inc(Count);
+              end;
+            3:
+              begin
+                for J := 1 to 3 do
+                begin
+                  if ExcelApp.WorkSheets[J].Name <> JunoFocusXLs_0 then
+                  begin
+                    ExcelApp.WorkSheets[J].Activate;
+                    if ExcelApp.Cells[4, 2].value <> JunoPPID then
+                    begin
+                      ExcelApp.Cells[4, 2].value := JunoPPID;
+                    end;
+                    if ExcelApp.Cells[3, 7].value <> JunoLotID then
+                    begin
+                      ExcelApp.Cells[3, 7].value := JunoLotID;
+                    end;
+                    SheetOldName := ExcelApp.WorkSheets[J].Name;
+                    OldNamePart := '';
+                    PosStr(SheetOldName, '-', 1, OldNamePart);
+                    SheetNewName := JunoLotID + OldNamePart;
+                    ExcelApp.WorkSheets[J].Name := SheetNewName;
+                  end;
+                end;
+              //修改Counter表的信息
+                ExcelApp.WorkSheets[JunoFocusXLs_0].Activate;
+                if ExcelApp.Cells[1, 2].value <> JunoLotID then
+                begin
+                  ExcelApp.Cells[1, 2].value := JunoLotID;
+                end;
+              //save
+                XlsName := ExtractFileName(FilePathList[I].FilePath);
+                XlsDir := ExtractFilePath(FilePathList[I].FilePath);
+                PosStr(XlsName, '-', 1, OldNamePart);
+                NewName := JunoLotID + OldNamePart;
+                ExcelApp.ActiveWorkBook.Saved := False;
+                ExcelApp.DisplayAlerts := False;
+                ExcelApp.ActiveWorkBook.save;
+                ExcelApp.WorkBooks.close;
+                RenameFile(FilePathList[I].FilePath, XlsDir + NewName);
+                TempXlsList[I] := XlsDir + NewName;
+                Inc(Count);
+              end;
+
+          end;
+        end;
+      3:
+        begin
+        //focus
+          if (FocusPPID = '') or (FocusLotID = '') then
+            Break;
+          ExcelApp.WorkBooks.Open(FilePathList[I].FilePath);
+          case FilePathList[I].TablesCount of
+            2:
+              begin
+                if ExcelApp.WorkSheets[1].Name <> JunoFocusXLs_0 then
+                begin
+                 //数据表修改数据
+                  ExcelApp.WorkSheets[1].Activate;
+                  if ExcelApp.Cells[4, 2].value <> FocusPPID then
+                  begin
+                    ExcelApp.Cells[4, 2].value := FocusPPID;
+                  end;
+                  if ExcelApp.Cells[3, 7].value <> FocusLotID then
+                  begin
+                    ExcelApp.Cells[3, 7].value := FocusLotID;
+                  end;
+                  SheetOldName := ExcelApp.WorkSheets[1].Name;
+                  OldNamePart := '';
+                  PosStr(SheetOldName, '-', 1, OldNamePart);
+                  SheetNewName := FocusLotID + OldNamePart;
+                  ExcelApp.WorkSheets[1].Name := SheetNewName;
+                end
+                else
+                begin
+                 //如果第一个表是counter，这种情况基本不太会有
+                  ExcelApp.WorkSheets[2].Activate;
+                  if ExcelApp.Cells[4, 1].value <> FocusPPID then
+                  begin
+                    ExcelApp.Cells[4, 1].value := FocusPPID;
+                  end;
+                  if ExcelApp.Cells[3, 7].value <> FocusLotID then
+                  begin
+                    ExcelApp.Cells[3, 7].value := FocusLotID;
+                  end;
+                  SheetOldName := ExcelApp.WorkSheets[2].Name;
+                  OldNamePart := '';
+                  PosStr(SheetOldName, '-', 1, OldNamePart);
+                  SheetNewName := FocusLotID + OldNamePart;
+                  ExcelApp.WorkSheets[2].Name := SheetNewName;
+                end;
+              //修改Counter表的信息
+                ExcelApp.WorkSheets[JunoFocusXLs_0].Activate;
+                if ExcelApp.Cells[1, 2].value <> FocusLotID then
+                begin
+                  ExcelApp.Cells[1, 2].value := FocusLotID;
+                end;
+              //save
+                XlsName := ExtractFileName(FilePathList[I].FilePath);
+                XlsDir := ExtractFilePath(FilePathList[I].FilePath);
+                PosStr(XlsName, '_', 1, OldNamePart);
+                NewName := FocusLotID + OldNamePart;
+                ExcelApp.ActiveWorkBook.Saved := False;
+                ExcelApp.DisplayAlerts := False;
+                ExcelApp.ActiveWorkBook.save;
+                ExcelApp.WorkBooks.close;
+                RenameFile(FilePathList[I].FilePath, XlsDir + NewName);
+                TempXlsList[I] := XlsDir + NewName;
+                Inc(Count);
+              end;
+            3:
+              begin
+                for J := 1 to 3 do
+                begin
+                  if ExcelApp.WorkSheets[J].Name <> JunoFocusXLs_0 then
+                  begin
+                    ExcelApp.WorkSheets[J].Activate;
+                    if ExcelApp.Cells[4, 2].value <> FocusPPID then
+                    begin
+                      ExcelApp.Cells[4, 2].value := FocusPPID;
+                    end;
+                    if ExcelApp.Cells[3, 7].value <> FocusLotID then
+                    begin
+                      ExcelApp.Cells[3, 7].value := FocusLotID;
+                    end;
+                    SheetOldName := ExcelApp.WorkSheets[J].Name;
+                    OldNamePart := '';
+                    PosStr(SheetOldName, '-', 1, OldNamePart);
+                    SheetNewName := FocusLotID + OldNamePart;
+                    ExcelApp.WorkSheets[J].Name := SheetNewName;
+                  end;
+                end;
+              //修改Counter表的信息
+                ExcelApp.WorkSheets[JunoFocusXLs_0].Activate;
+                if ExcelApp.Cells[1, 2].value <> FocusLotID then
+                begin
+                  ExcelApp.Cells[1, 2].value := FocusLotID;
+                end;
+              //save
+                XlsName := ExtractFileName(FilePathList[I].FilePath);
+                XlsDir := ExtractFilePath(FilePathList[I].FilePath);
+                PosStr(XlsName, '_', 1, OldNamePart);
+                NewName := FocusPPID + OldNamePart;
+                ExcelApp.ActiveWorkBook.Saved := False;
+                ExcelApp.DisplayAlerts := False;
+                ExcelApp.ActiveWorkBook.save;
+                ExcelApp.WorkBooks.close;
+                RenameFile(FilePathList[I].FilePath, XlsDir + NewName);
+                TempXlsList[I] := XlsDir + NewName;
+                Inc(Count);
+              end;
+          end;
+        end;
+    end;
+  end;
+  ExcelApp.Quit;
+  ExcelApp := Unassigned;
+  ShowMessage('总共修改了' + IntToStr(Count) + '个文件！');
 end;
 
 function TXlsFileRename.ReXlsName(List: TXlsList; out Count: Integer): Boolean;
@@ -701,6 +1021,7 @@ var
   NewName: string;
   XlsArr: TArray<string>;
   OldNamePart: string;
+  AccoStr: string;
 begin
   Count := 0;
   Result := True;
@@ -725,7 +1046,7 @@ begin
               end;
             end;
           end;
-        3:
+        3: //focus
           begin
             if edtFocusLotID.Text <> List[I].LotID then
             begin
@@ -738,12 +1059,14 @@ begin
               end;
             end;
           end;
-        1:
+        1: //acco
           begin
             if (edtAccoPPID.Text <> List[I].PPID) or (edtACCOLotID.Text <> List[I].LotID) then
             begin
               PosStr(XlsName, '_', 3, OldNamePart);
-              NewName := edtAdjPPID.Text + '_' + edtAdjLotID.Text + OldNamePart;
+              AccoStr := edtAdjPPID.Text;
+
+              NewName := Copy(AccoStr, 1, Length(AccoStr) - 4) + '_' + edtAdjLotID.Text + OldNamePart;
               if RenameFile(Path, XlsDir + NewName) then
               begin
                 Inc(Count);

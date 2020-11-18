@@ -43,9 +43,9 @@ object Form11: TForm11
   end
   object mmo1: TMemo
     Left = 112
-    Top = 96
+    Top = 128
     Width = 744
-    Height = 265
+    Height = 233
     Lines.Strings = (
       'mmo1')
     ScrollBars = ssVertical
@@ -127,9 +127,9 @@ object Form11: TForm11
   end
   object lv1: TListView
     Left = 0
-    Top = 96
+    Top = 128
     Width = 113
-    Height = 264
+    Height = 232
     Columns = <
       item
         Caption = 'Name'
@@ -139,13 +139,76 @@ object Form11: TForm11
     ViewStyle = vsList
   end
   object btn1: TButton
-    Left = 448
-    Top = 32
+    Left = 297
+    Top = 72
     Width = 75
     Height = 25
     Caption = 'btn1'
     TabOrder = 11
     OnClick = btn1Click
+  end
+  object grp1: TGroupBox
+    Left = 392
+    Top = 8
+    Width = 313
+    Height = 114
+    Caption = #27880#37322'TST'#25991#20214
+    TabOrder = 12
+    object rb1: TRadioButton
+      Left = 16
+      Top = 19
+      Width = 49
+      Height = 17
+      Caption = 'Prod'
+      TabOrder = 0
+    end
+    object rb2: TRadioButton
+      Left = 16
+      Top = 42
+      Width = 49
+      Height = 17
+      Caption = 'Eng'
+      TabOrder = 1
+    end
+    object edtNumberCommit: TEdit
+      Left = 71
+      Top = 17
+      Width = 121
+      Height = 21
+      TabOrder = 2
+    end
+    object btnLock: TButton
+      Left = 117
+      Top = 44
+      Width = 75
+      Height = 25
+      Caption = #27880#37322
+      TabOrder = 3
+    end
+    object btnUnlock: TButton
+      Left = 198
+      Top = 44
+      Width = 75
+      Height = 25
+      Caption = #35299#38145
+      TabOrder = 4
+    end
+    object btnUpload: TButton
+      Left = 235
+      Top = 86
+      Width = 75
+      Height = 25
+      Caption = #19978#20256#25991#20214
+      TabOrder = 5
+    end
+    object btnSearch: TButton
+      Left = 198
+      Top = 15
+      Width = 75
+      Height = 25
+      Caption = #26597#35810
+      TabOrder = 6
+    end
   end
   object idftp2: TIdFTP
     IPVersion = Id_IPv4

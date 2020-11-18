@@ -4,8 +4,8 @@ object XlsFileRename: TXlsFileRename
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Xls'#22788#29702
-  ClientHeight = 441
-  ClientWidth = 790
+  ClientHeight = 419
+  ClientWidth = 776
   Color = clWindow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -30,7 +30,6 @@ object XlsFileRename: TXlsFileRename
     Top = 0
     Width = 775
     Height = 193
-    Checkboxes = True
     Columns = <
       item
         Caption = 'Name'
@@ -195,8 +194,8 @@ object XlsFileRename: TXlsFileRename
     end
   end
   object btnYes: TButton
-    Left = 310
-    Top = 382
+    Left = 318
+    Top = 374
     Width = 115
     Height = 41
     Caption = #19968#38190#26356#25913
@@ -295,10 +294,10 @@ object XlsFileRename: TXlsFileRename
     Top = 72
   end
   object pm1: TPopupMenu
-    Left = 360
-    Top = 128
+    Left = 336
+    Top = 144
     object N2: TMenuItem
-      Caption = #20840#36873
+      Caption = #28165#38500#25152#26377
       OnClick = N2Click
     end
   end

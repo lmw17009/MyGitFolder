@@ -93,9 +93,9 @@ type
     procedure CPSPEC1Click(Sender: TObject);
     procedure FTP1Click(Sender: TObject);
     procedure WatLimit1Click(Sender: TObject);
-    procedure XLS1Click(Sender: TObject);
     procedure mniTSKSampleClick(Sender: TObject);
     procedure mniN7Click(Sender: TObject);
+    procedure XLS1Click(Sender: TObject);
   private
     procedure SaveTSKMapFile;
 
@@ -137,7 +137,7 @@ implementation
 
 uses
   Global, Unit2, Unit3, Unit5, Unit6, Unit7, Unit8, WAT, Limit, FTP, WatLimit,
-  XlsReName, Help, Update, XlsFileAdjust;
+  XlsReName, Help, Update, XlsFileAdjust, ExcelAdjust;
 
 procedure TForm1.A1Click(Sender: TObject);
 begin
@@ -1666,10 +1666,7 @@ end;
 
 procedure TForm1.XLS1Click(Sender: TObject);
 begin
-  if not Form12.Showing then
-  begin
-    Form12.Show;
-  end;
+  ExcelAdj.show;
 end;
 
 procedure TForm1.XXLBtnClick(Sender: TObject);
@@ -1752,10 +1749,16 @@ begin
 end;
 
 procedure TForm1.CPSPEC1Click(Sender: TObject);
+var
+  S1, S2, S3, S4: string;
 begin
-  ShowMessage('请拖拽或者加载入未被打开的PED CP测试数据[修改模式为按测试机类型ACCO/JUNO/FOCUS]！');
+  S1 := '1,请使用加载或者拖入的形式放入未打开的xls文件，请不要拖入文件夹或者其他格式的文件。';
+  S2 := '2,请尽量不要把xls文件放在自己新建的文件夹，尽量考虑桌面或者根目录位置放置，此为系统权限问题。';
+  S3 := '3，同机台类型ACCO/JUNO/FOCUS的数据只按一个ppid或者lotid修改,PPID和LotID都必须勾选，尽管LotID基本不用修改。';
+  S4 := '4,【拖入文件=>选择PPID/LotID=>修改PPID/LotID=>一键更改】';
+  ShowMessage(S1 + #13 + S2 + #13 + S3 + #13 + S4);
   //Form10.Show;
-  xlsfileRename.Show;
+  XlsFileRename.Show;
 end;
 
 procedure TForm1.Dat1Click(Sender: TObject);
