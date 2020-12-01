@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{CA726DFE-CB2A-4D58-96D4-9FCC5FAB98B6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="..\JunoBarcode\JunoBarcode.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Upload.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="JunoBarcode">
+        <MSBuild Projects="..\JunoBarcode\JunoBarcode.dproj"/>
+    </Target>
+    <Target Name="JunoBarcode:Clean">
+        <MSBuild Projects="..\JunoBarcode\JunoBarcode.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="JunoBarcode:Make">
+        <MSBuild Projects="..\JunoBarcode\JunoBarcode.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Upload">
+        <MSBuild Projects="Upload.dproj"/>
+    </Target>
+    <Target Name="Upload:Clean">
+        <MSBuild Projects="Upload.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Upload:Make">
+        <MSBuild Projects="Upload.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="JunoBarcode;Upload"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="JunoBarcode:Clean;Upload:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="JunoBarcode:Make;Upload:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
