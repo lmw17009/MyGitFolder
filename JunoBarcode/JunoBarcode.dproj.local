@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.574,D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas=D:\Lidashi\dephixeproject\JunoBarcode\Global.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.736,=D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.576,=D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.559,=D:\Lidashi\dephixeproject\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.195,=D:\Lidashi\dephixeproject\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.457,=D:\Lidashi\dephixeproject\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.923,D:\Lidashi\dephixeproject\JunoBarcode\SelectStation.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.328,D:\Lidashi\dephixeproject\JunoBarcode\Unit3.pas=D:\Lidashi\dephixeproject\JunoBarcode\SelectStation.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.361,=D:\Lidashi\dephixeproject\JunoBarcode\Unit3.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.295,D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas=D:\Lidashi\dephixeproject\JunoBarcode\Tool.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.414,=D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.672,D:\Lidashi\dephixeproject\JunoBarcode\Unit2.pas=D:\Lidashi\dephixeproject\JunoBarcode\AutoUpdate.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.706,=D:\Lidashi\dephixeproject\JunoBarcode\JsonAdjust.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.633,D:\Lidashi\dephixeproject\Unit1.dfm=D:\Lidashi\dephixeproject\JunoBarcode\Unit1.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.328,D:\Lidashi\dephixeproject\JunoBarcode\Unit3.dfm=D:\Lidashi\dephixeproject\JunoBarcode\SelectStation.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.042,D:\Lidashi\dephixeproject\CoreFunction\BarcodeHook.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.739,=D:\Lidashi\dephixeproject\CoreFunction\BarcodeHook.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.295,D:\Lidashi\dephixeproject\JunoBarcode\Unit2.dfm=D:\Lidashi\dephixeproject\JunoBarcode\Tool.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.633,D:\Lidashi\dephixeproject\Unit1.pas=D:\Lidashi\dephixeproject\JunoBarcode\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.390,=D:\Lidashi\dephixeproject\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.866,=D:\Lidashi\dephixeproject\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.677,D:\Lidashi\dephixeproject\Project1.dproj=D:\Lidashi\dephixeproject\JunoBarcode\Project1.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.194,=D:\Lidashi\dephixeproject\JunoBarcode\BarcodeHook.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.509,D:\Lidashi\dephixeproject\JunoBarcode\JunoBarcode.dproj=D:\Lidashi\dephixeproject\JunoBarcode\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

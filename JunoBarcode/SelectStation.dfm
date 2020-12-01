@@ -1,0 +1,53 @@
+object Form3: TForm3
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  Caption = #36873#31449
+  ClientHeight = 86
+  ClientWidth = 175
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object rb1: TRadioButton
+    Left = 8
+    Top = 16
+    Width = 65
+    Height = 25
+    Caption = 'A'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -27
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 0
+  end
+  object rb2: TRadioButton
+    Left = 88
+    Top = 12
+    Width = 65
+    Height = 33
+    Caption = 'B'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -27
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+  end
+  object btn1: TButton
+    Left = 39
+    Top = 51
+    Width = 75
+    Height = 25
+    Caption = #30830#23450
+    TabOrder = 2
+  end
+end

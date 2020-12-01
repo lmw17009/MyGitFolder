@@ -1,0 +1,66 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsToolWindow
+  Caption = 'Barcode'
+  ClientHeight = 65
+  ClientWidth = 194
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  FormStyle = fsStayOnTop
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object btnBarcodSt: TButton
+    Left = 0
+    Top = 0
+    Width = 80
+    Height = 41
+    Caption = #26174#31034
+    TabOrder = 0
+    OnClick = btnBarcodStClick
+  end
+  object rb1: TRadioButton
+    Left = 95
+    Top = 8
+    Width = 49
+    Height = 22
+    Caption = 'A'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -27
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 1
+  end
+  object rb2: TRadioButton
+    Left = 150
+    Top = 8
+    Width = 49
+    Height = 22
+    Caption = 'B'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -27
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+  end
+  object btn1: TButton
+    Left = 111
+    Top = 36
+    Width = 75
+    Height = 25
+    Caption = #35831#36873#31449
+    TabOrder = 3
+    OnClick = btn1Click
+  end
+end
