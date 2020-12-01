@@ -93,6 +93,7 @@ type
     edtFocusAdjustPPID: TEdit;
     pm1: TPopupMenu;
     N2: TMenuItem;
+    lst1: TListBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure cbb1Select(Sender: TObject);

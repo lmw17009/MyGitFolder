@@ -168,6 +168,10 @@
             <Form>XlsFileRename</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="MapCreate.pas">
+            <Form>Form15</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

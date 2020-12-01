@@ -255,6 +255,14 @@ object XlsFileRename: TXlsFileRename
       OnSelect = cbb5Select
     end
   end
+  object lst1: TListBox
+    Left = 496
+    Top = 408
+    Width = 121
+    Height = 97
+    ItemHeight = 13
+    TabOrder = 5
+  end
   object Conn1: TFDConnection
     Params.Strings = (
       'Database=d:\11.xls'

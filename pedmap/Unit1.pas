@@ -57,6 +57,7 @@ type
     N6: TMenuItem;
     mniTSKSample: TMenuItem;
     mniN7: TMenuItem;
+    btn1: TButton;
     procedure E1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure NBBtnClick(Sender: TObject);
@@ -96,6 +97,7 @@ type
     procedure mniTSKSampleClick(Sender: TObject);
     procedure mniN7Click(Sender: TObject);
     procedure XLS1Click(Sender: TObject);
+    procedure btn1Click(Sender: TObject);
   private
     procedure SaveTSKMapFile;
 
@@ -137,7 +139,7 @@ implementation
 
 uses
   Global, Unit2, Unit3, Unit5, Unit6, Unit7, Unit8, WAT, Limit, FTP, WatLimit,
-  XlsReName, Help, Update, XlsFileAdjust, ExcelAdjust;
+  XlsReName, Help, Update, XlsFileAdjust, ExcelAdjust,MapCreate;
 
 procedure TForm1.A1Click(Sender: TObject);
 begin
@@ -209,6 +211,11 @@ end;
 procedure TForm1.BrushBtnMouseEnter(Sender: TObject);
 begin
   Self.ShowHint := True;
+end;
+
+procedure TForm1.btn1Click(Sender: TObject);
+begin
+   Form15.show;
 end;
 
 function SaveTskTestPos(var Path: string): Boolean;

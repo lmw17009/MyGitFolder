@@ -19,6 +19,8 @@ const
   TEL_Skip_Bin = 1275; //4*256+251
   TEL_Mark_Bin = 2295; //8*256+247
   PosMaxNumber = 99999; //最大的坐标检测数目 上限10w
+  WaferSize = 200000; //8 inch 20cm=200000um;
+  WaferR = 100000; // R
   Bin_0 = 0; //skip
   Bin_1 = 1;
   Bin_2 = 2;
@@ -48,7 +50,11 @@ const
   WatCenterBin = 80;
   WatMarkBin = 0;
   WatNormalBin = 64;
-  //wat folder name
+  //createmap
+  Dir_0 = 0;
+  Dir_90 = 1;
+  Dir_180 = 2;
+  Dir_270 = 3;
 
 var
   XIndexPosArr: array of Integer;
@@ -124,6 +130,14 @@ var
   PilProdFileName: string; //pil_prod file name
   PilEngFileName: string; //pil_ENG file name
   WatFilePath: string; //wat file download adjust path
+
+
+  //以下是mapcreate类的功能参数
+  MapCreate_XCount, MapCreate_YCount: Integer; //xchip ychip count
+  MapCreateIndexSize: Integer = 10;
+  StDIr: Integer; //direction 0=0 1=90 2=180 3=270;
+  XChipSize: Integer; // xindex
+  YChipSize: Integer; //yindex
 
 implementation
 

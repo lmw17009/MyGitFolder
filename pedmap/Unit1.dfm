@@ -244,6 +244,15 @@ object Form1: TForm1
     Caption = #38145#23450'Mark'
     TabOrder = 19
   end
+  object btn1: TButton
+    Left = 736
+    Top = 560
+    Width = 75
+    Height = 25
+    Caption = 'btn1'
+    TabOrder = 20
+    OnClick = btn1Click
+  end
   object dlgOpen1: TOpenDialog
     Left = 80
     Top = 40

@@ -20,7 +20,8 @@ uses
   XlsSetup in 'XlsSetup.pas' {Form13},
   JsonAdjust in 'JsonAdjust.pas',
   Help in 'Help.pas' {Form14},
-  XlsFileAdjust in 'XlsFileAdjust.pas' {XlsFileRename};
+  XlsFileAdjust in 'XlsFileAdjust.pas' {XlsFileRename},
+  MapCreate in 'MapCreate.pas' {Form15};
 
 {$R *.res}
 
@@ -43,6 +44,7 @@ begin
   Application.CreateForm(TForm13, Form13);
   Application.CreateForm(TForm14, Form14);
   Application.CreateForm(TXlsFileRename, XlsFileRename);
+  Application.CreateForm(TForm15, Form15);
   Application.Run;
 end.
 
