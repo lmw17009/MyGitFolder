@@ -6,7 +6,8 @@ FTI专用程序参数启动程序，使用了BarcodeHook系统级别的键盘钩子。
 支持扫码退出程序。
 程序原理：利用CreateProcess函数为启动程序添加启动Parameter，进程会被保存，如果保存的进程存在则支持扫码退出程序。
 目前支持录入后时间定时检测，如果前后二个字符串的生成时间超过了设定值则自动停止此次录入。
-
+2020-11-09 修改UI 去除自动扫码模式 ，修改部分逻辑
+2020-11-27 更换logo
 *)
 unit Unit1;
 
@@ -22,9 +23,9 @@ const
   FstSpltStr = ',';
   PPIDPathHead = '\\10.9.64.72\cp\CP TEST PLAN\test plan\FOCUS\16-sites\';
   ConfigFilePath = 'C:\ProgramConfigFileFolder\';
-  AutoBarcodeMode = 1; //0= not autohook,1=auto hook
+  AutoBarcodeMode = 0; //0= not autohook,1=auto hook
   WorkMode = 1; //0=PPID;1=json
-  version = '2020-11-01';
+  version = '20201116';
   FTIProcessName = 'FTISTUDIOPRODUCTION';
 
 type
@@ -38,7 +39,6 @@ type
     lbl3: TLabel;
     edtProgramPath: TEdit;
     lbl4: TLabel;
-    btn2: TButton;
     dlgOpen1: TOpenDialog;
     edtEdtBQMSG: TEdit;
     lbl5: TLabel;
@@ -48,31 +48,36 @@ type
     lblProcess: TLabel;
     lbl6: TLabel;
     pm1: TPopupMenu;
-    N1: TMenuItem;
     N2: TMenuItem;
-    N3: TMenuItem;
     FTI1: TMenuItem;
+    btnLockBarcode: TButton;
+    mm1: TMainMenu;
+    N4: TMenuItem;
+    N5: TMenuItem;
+    N6: TMenuItem;
+    N7: TMenuItem;
     procedure FormCreate(Sender: TObject);
-    procedure btn2Click(Sender: TObject);
     procedure tmr1Timer(Sender: TObject);
     procedure mmo1Change(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure chkAutoCloseMouseEnter(Sender: TObject);
     procedure chkHideWorkMouseEnter(Sender: TObject);
-    procedure btn2MouseEnter(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure edtEdtBQMSGChange(Sender: TObject);
     procedure edtEdtBQMSGClick(Sender: TObject);
     procedure edtPPIDPathMouseEnter(Sender: TObject);
-    procedure N1Click(Sender: TObject);
     procedure N2Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
     procedure FTI1Click(Sender: TObject);
+    procedure btnLockBarcodeClick(Sender: TObject);
+    procedure N5Click(Sender: TObject);
+    procedure N7Click(Sender: TObject);
+    procedure N6Click(Sender: TObject);
   private
     procedure EdtClearPro;
     procedure BarcodeManualInput;
     procedure PosFun;
+    procedure SaveLog(Lines: Integer);
 
     { Private declarations }
   public
@@ -119,7 +124,6 @@ var
 begin
 
   MmoAdd('BarcodeCheck:' + BarcodeString);
-  //edtEdtBQMSG.Text := BarcodeString;
   try
     MmoAdd('BarcodeCheck:准备解析Barcode数据...');
     if not JsonAdj(BarcodeString, TempJs) then
@@ -239,7 +243,7 @@ begin
       //MmoAdd('BarcodeCheck:命令行创建成功。');
 
       //MmoAdd(ParamaLineStr);
-    if chkAutoClose.Checked or (lblProcess.Caption <> '0') then
+    if {chkAutoClose.Checked or } (lblProcess.Caption <> '0') then
     begin
       CloseProgram;
     end;
@@ -261,6 +265,7 @@ begin
     begin
       MmoAdd('BarcodeCheck:程序启动成功...');
       lblProcess.Caption := IntToStr(WinHandle);
+      edtEdtBQMSG.Visible := False;
     end
     else
     begin
@@ -294,25 +299,22 @@ begin
   tmr1.Enabled := True;
 end;
 
-procedure TForm1.btn2Click(Sender: TObject);
+procedure TForm1.btnLockBarcodeClick(Sender: TObject);
 begin
-  Form2.Show;
-end;
-
-procedure TForm1.btn2MouseEnter(Sender: TObject);
-begin
-  btn2.ShowHint := True;
+  edtEdtBQMSG.Visible := True;
+  edtEdtBQMSG.SetFocus;
+  edtEdtBQMSG.Text := '';
 end;
 
 procedure TForm1.chkAutoCloseMouseEnter(Sender: TObject);
 begin
   chkAutoClose.ShowHint := True;
-  //chk1.Hint:='111';
+
 end;
 
 procedure TForm1.chkHideWorkMouseEnter(Sender: TObject);
 begin
-  chkHideWork.ShowHint := True;
+  //chkHideWork.ShowHint := True;
 end;
 
 function TForm1.CloseProgram: Boolean;
@@ -464,13 +466,14 @@ begin
   Posx := Screen.Width - W;
   PoxY := Screen.Height - H;
   Self.Left := Posx;
-  Self.Top := PoxY div 2;
+  //Self.Top := PoxY div 2;
 end;
 
 procedure TForm1.BarcodeManualInput;
 var
   Str: string;
   Temp: BarcodeJs;
+  MyHwnd: HWND;
 begin
   Str := UpperCase(Trim(edtEdtBQMSG.Text));
   if Pos('}', Str) <> Length(Str) then
@@ -483,15 +486,15 @@ begin
     PPID := Temp.PPID;
     LotID := '';
     BarcodeCheck(nil, Str);
+
+    //MyHwnd := FindWindow(nil, PWideChar(Self.Caption));
+//    if MyHwnd <> 0 then
+//    begin
+//      SetWindowPos(MyHwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE);
+//      //SetWindowPos(MyHwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE);
+//    end;
     PosFun;
   end;
-//  mmo1.Lines.Add(Temp.PPID);
-//  mmo1.Lines.Add(Temp.LotID);
-//  mmo1.Lines.Add(Temp.WaferNumber);
-//  mmo1.Lines.Add(Temp.UserID);
-//  mmo1.Lines.Add(Temp.EqID);
-//  mmo1.Lines.Add(Temp.TesterID);
-//  mmo1.Lines.Add(Temp.ProberID);
 
 end;
 
@@ -529,9 +532,23 @@ begin
   end;
 end;
 
+procedure TForm1.SaveLog(Lines: Integer);
+var
+  LogName: string;
+  Path: string;
+begin
+  if mmo1.Lines.Count > Lines then
+  begin
+    LogName := FormatDateTime('yyyymmddhhmmnn', Now);
+    Path := ExtractFilePath(ParamStr(0)) + '\FTI';
+    mmo1.Lines.SaveToFile(Path + '\FTLog' + LogName + '.txt');
+  end;
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   //FreeAndNil(FBarReader);
+  SaveLog(0);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -561,14 +578,14 @@ end;
 
 procedure TForm1.FormResize(Sender: TObject);
 begin
-  if (Self.WindowState = wsMinimized) and (FBarReader <> nil) then
-  begin
-    if not chkHideWork.Checked then
-    begin
-      mmo1.Lines.Add('hide');
-      FBarReader.HideNoMonitor := True;
-    end;
-  end;
+//  if (Self.WindowState = wsMinimized) and (FBarReader <> nil) then
+//  begin
+//    if not chkHideWork.Checked then
+//    begin
+//      mmo1.Lines.Add('hide');
+//      FBarReader.HideNoMonitor := True;
+//    end;
+//  end;
 end;
 
 procedure TForm1.FormShow(Sender: TObject);
@@ -595,9 +612,13 @@ begin
   Result := True;
   try
     Path := ExtractFilePath(ParamStr(0)); //获取程序路径
+    if not DirectoryExists(Path + '\FTI') then
+    begin
+      CreateDir(Path + 'FTI');
+    end;
     if not FileExists(Path + 'Path.txt') then
     begin
-      ShowMessage('自动扫码未启动，请点击设置添加路径，完成后务必重启软件！！！');
+      ShowMessage('请点击设置添加路径，完成后务必重启软件！！！');
     end
     else
     begin
@@ -624,7 +645,6 @@ begin
         PPIDPathFileGet := PPIDDir;
         mmo1.Lines.Add('=>已经获取PPPID路径！');
         mmo1.Lines.Add('=>PPID:' + PPIDDir);
-        btn2.Enabled := False;
       end
       else
       begin
@@ -636,10 +656,7 @@ begin
     end;
   except
     mmo1.Lines.Add('>Path路径文件内容错误！');
-  end;
-  if not Result then
-  begin
-    btn2.Enabled := True;
+
   end;
 
 end;
@@ -686,31 +703,12 @@ end;
 
 procedure TForm1.mmo1Change(Sender: TObject);
 begin
-  if mmo1.Lines.Count > 11200 then
-  begin
-    mmo1.Lines.Clear;
-  end;
+  SaveLog(300);
 end;
 
 procedure TForm1.MmoAdd(Str: string);
 begin
-  if N1.Checked then
-  begin
-    mmo1.Lines.Add('>' + Str);
-  end;
-end;
-
-procedure TForm1.N1Click(Sender: TObject);
-begin
-  N1.Checked := not N1.Checked;
-  if not N1.Checked then
-  begin
-    Self.Height := 162;
-  end
-  else
-  begin
-    Self.Height := 315;
-  end;
+  mmo1.Lines.Add('>' + Str);
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
@@ -718,18 +716,21 @@ begin
   mmo1.Lines.Clear;
 end;
 
-procedure TForm1.N3Click(Sender: TObject);
+procedure TForm1.N5Click(Sender: TObject);
 begin
-  N3.Checked := not N3.Checked;
-  if N3.Checked then
+  Application.Terminate;
+end;
+
+procedure TForm1.N6Click(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+procedure TForm1.N7Click(Sender: TObject);
+begin
+  if not Form2.Showing then
   begin
-    edtEdtBQMSG.ReadOnly := False;
-    edtEdtBQMSG.Enabled := True;
-  end
-  else
-  begin
-    edtEdtBQMSG.ReadOnly := True;
-    edtEdtBQMSG.Enabled := False;
+    Form2.Show;
   end;
 end;
 
